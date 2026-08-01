@@ -949,7 +949,8 @@
                         for (let i = 0; i < currentSentencePairs.length; i++) {
                             const pair = currentSentencePairs[i];
                             const sec = pair.seconds !== undefined ? pair.seconds : parseTimeToSeconds(pair.time);
-                            if (sec <= currentTime + 0.3) {
+                            // Trễ hơn 0.5s so với thời gian hiện tại của video
+                            if (sec <= currentTime - 0.5) {
                                 activeIdx = i;
                             } else {
                                 break;
