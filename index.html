@@ -445,32 +445,6 @@
         </div>
     </div>
 
-    <!-- MODAL LỰA CHỌN SAO CHÉP DỮ LIỆU -->
-    <div id="copyOptionsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-md p-5 space-y-4 animate-slide-up-modal my-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chọn chế độ Sao Chép</h3>
-                <button id="closeCopyOptionsModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-
-            <p class="text-xs text-slate-500 dark:text-slate-400">Chọn định dạng mã bạn muốn sao chép để khôi phục sau này:</p>
-
-            <div class="space-y-2.5">
-                <button id="btnCopyTranslationOnly" class="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex flex-col gap-0.5">
-                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">1. Chỉ Sao Chép Bài Dịch & Video</span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Chỉ sao chép nội dung bài dịch và link video. Khi dán khôi phục sẽ GIỮ NGUYÊN Sổ Từ Vựng hiện tại.</span>
-                </button>
-
-                <button id="btnCopyFullPackage" class="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all flex flex-col gap-0.5">
-                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">2. Sao Chép Tất Cả (Bài Dịch + Sổ Từ Vựng)</span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Sao chép trọn gói bao gồm Bài dịch, Link Video và toàn bộ Sổ Từ Vựng đã lưu.</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- THANH NỔI 3 NÚT CHỌN TỪ -->
     <div id="selectionFloatingBar" class="fixed bottom-6 left-1/2 z-40 bg-slate-900/95 dark:bg-slate-950/95 text-white backdrop-blur-md rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-2 border border-slate-700/80 hidden transition-all animate-slide-up-floating max-w-[92vw]">
         <div class="mr-1 hidden sm:block">
@@ -654,11 +628,6 @@
             const ytRestoreDataBtn = getEl('ytRestoreDataBtn');
             const ytCopySpecialBtn = getEl('ytCopySpecialBtn');
             const topActionButtonsGroup = getEl('topActionButtonsGroup');
-
-            const copyOptionsModal = getEl('copyOptionsModal');
-            const closeCopyOptionsModal = getEl('closeCopyOptionsModal');
-            const btnCopyTranslationOnly = getEl('btnCopyTranslationOnly');
-            const btnCopyFullPackage = getEl('btnCopyFullPackage');
 
             const dropZoneImages = getEl('dropZoneImages');
             const fileInputImages = getEl('fileInputImages');
@@ -1261,12 +1230,13 @@ Nhiệm vụ:
 
                     systemPrompt = `Bạn là chuyên gia dịch thuật và xử lý transcript YouTube Anh - Việt.
 Nhiệm vụ:
-1. Nhận transcript tiếng Anh có kèm mốc thời gian (ví dụ 00:16, 6:26...).
-2. Tách/gộp thành từng câu thoại ngắn hợp lý kèm mốc thời gian tương ứng.
-3. Trả về định dạng JSON Array chứa các phần tử:
+1. Nhận transcript tiếng Anh có mốc thời gian (ví dụ 00:16, 06:26...).
+2. Bắt buộc GIỮ NGUYÊN từng mốc thời gian theo đúng từng dòng transcript gốc (KHÔNG gộp hay nối câu theo dấu chấm). Mỗi mốc thời gian tạo thành 1 dòng transcript riêng biệt.
+3. Làm sạch các thẻ '[music]' hoặc '[Music]': Nếu dòng transcript có kèm các từ/chữ khác ngoài '[music]', hãy BỎ hẳn nhãn '[music]' đó đi để câu không bị vỡ. Nếu một dòng transcript CHỈ CHỨA DUY NHẤT từ '[music]', hãy GIỮ NGUYÊN dòng đó.
+4. Trả về định dạng JSON Array chứa các phần tử:
    - "time": Mốc thời gian nguyên bản (ví dụ "00:16", "06:26").
    - "seconds": Thời gian tính bằng giây quy đổi ra số (ví dụ 16, 386).
-   - "en": Câu/Cụm từ tiếng Anh.
+   - "en": Câu/Cụm từ tiếng Anh đã làm sạch [music] thừa.
    - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
 
                     responseSchema = {
@@ -1754,50 +1724,26 @@ Trả về JSON:
                 });
             }
 
-            function triggerCopyModal() {
-                if (!currentSentencePairs || currentSentencePairs.length === 0) return;
-                if (copyOptionsModal) copyOptionsModal.classList.remove('hidden');
+            function executeDirectCopy() {
+                if (!currentSentencePairs || currentSentencePairs.length === 0) {
+                    return showToast('Chưa có dữ liệu bài dịch để sao chép!', true);
+                }
+
+                const fullPackage = {
+                    type: 'full_package',
+                    sentencePairs: currentSentencePairs,
+                    vocabLibrary: vocabLibrary,
+                    youtubeUrl: ytUrlInput ? ytUrlInput.value.trim() : '',
+                    followEnabled: isFollowEnabled,
+                    playbackSpeed: currentPlaybackSpeed
+                };
+
+                copyToClipboard(JSON.stringify(fullPackage));
+                showToast('Đã sao chép toàn bộ dữ liệu (Bài dịch + Video + Sổ từ vựng)!');
             }
 
-            if (copySpecialDataBtn) copySpecialDataBtn.addEventListener('click', triggerCopyModal);
-            if (ytCopySpecialBtn) ytCopySpecialBtn.addEventListener('click', triggerCopyModal);
-
-            if (closeCopyOptionsModal) {
-                closeCopyOptionsModal.addEventListener('click', () => copyOptionsModal.classList.add('hidden'));
-            }
-
-            if (btnCopyTranslationOnly) {
-                btnCopyTranslationOnly.addEventListener('click', () => {
-                    const packageOnly = {
-                        type: 'translation_only',
-                        sentencePairs: currentSentencePairs,
-                        youtubeUrl: ytUrlInput ? ytUrlInput.value.trim() : '',
-                        followEnabled: isFollowEnabled,
-                        playbackSpeed: currentPlaybackSpeed
-                    };
-
-                    copyToClipboard(JSON.stringify(packageOnly));
-                    if (copyOptionsModal) copyOptionsModal.classList.add('hidden');
-                    showToast('Đã chép Mã Bài Dịch! Khi dán khôi phục sẽ GIỮ NGUYÊN Sổ từ vựng.');
-                });
-            }
-
-            if (btnCopyFullPackage) {
-                btnCopyFullPackage.addEventListener('click', () => {
-                    const packageFull = {
-                        type: 'full_package',
-                        sentencePairs: currentSentencePairs,
-                        vocabLibrary: vocabLibrary,
-                        youtubeUrl: ytUrlInput ? ytUrlInput.value.trim() : '',
-                        followEnabled: isFollowEnabled,
-                        playbackSpeed: currentPlaybackSpeed
-                    };
-
-                    copyToClipboard(JSON.stringify(packageFull));
-                    if (copyOptionsModal) copyOptionsModal.classList.add('hidden');
-                    showToast('Đã chép Mã Trọn Gói (Bài dịch + Sổ từ vựng)!');
-                });
-            }
+            if (copySpecialDataBtn) copySpecialDataBtn.addEventListener('click', executeDirectCopy);
+            if (ytCopySpecialBtn) ytCopySpecialBtn.addEventListener('click', executeDirectCopy);
 
             function copyToClipboard(str) {
                 const temp = document.createElement('textarea');
@@ -1827,7 +1773,6 @@ Trả về JSON:
                         const parsedData = JSON.parse(pastedText);
                         let restoredPairs = [];
                         let restoredVocab = null;
-                        const isTranslationOnly = (parsedData.type === 'translation_only');
 
                         if (Array.isArray(parsedData)) {
                             restoredPairs = parsedData;
@@ -1875,12 +1820,15 @@ Trả về JSON:
                             renderResults(restoredPairs);
                         }
 
-                        if (!isTranslationOnly && restoredVocab && restoredVocab.length > 0) {
+                        // Bổ sung từ vựng mới từ mã khôi phục vào Sổ từ vựng hiện tại (không xóa từ cũ)
+                        if (restoredVocab && restoredVocab.length > 0) {
                             const existingIds = new Set(vocabLibrary.map(v => v.id));
+                            let addedCount = 0;
                             restoredVocab.forEach(item => {
                                 if (!existingIds.has(item.id)) {
                                     vocabLibrary.push(item);
                                     existingIds.add(item.id);
+                                    addedCount++;
                                 }
                             });
                             localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
@@ -1888,7 +1836,7 @@ Trả về JSON:
                         }
 
                         if (restoreModal) restoreModal.classList.add('hidden');
-                        showToast(isTranslationOnly ? 'Đã khôi phục bài dịch! (Sổ từ vựng được giữ nguyên).' : 'Khôi phục bài dịch & sổ từ vựng thành công!');
+                        showToast('Đã khôi phục thành công! (Nội dung mới đã được cập nhật & bổ sung vào sổ từ vựng).');
                     } catch (e) {
                         showToast('Mã dữ liệu không đúng định dạng khôi phục.', true);
                     }
