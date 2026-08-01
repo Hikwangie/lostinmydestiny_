@@ -104,12 +104,13 @@
             --font-vi-scale: 1;
             --card-gap: 12px;
             --pair-gap: 4px;
+            scroll-behavior: smooth; /* Lướt thanh trượt mịn màng trong khung output */
         }
 
-        /* Thẻ transcript mặc định */
+        /* Thẻ transcript mặc định: Màu #0C1115 trong Dark Mode, chuyển màu mượt */
         #outputContainer > div.sentence-card {
             margin-bottom: var(--card-gap, 12px) !important;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
+            transition: background-color 0.25s ease, border-color 0.25s ease;
             background-color: #ffffff;
             border: 1.5px solid #e2e8f0;
         }
@@ -119,7 +120,7 @@
             border: 1.5px solid transparent !important;
         }
 
-        /* Khi active: Viền #369694 dày hơn 1 xíu, card màu #15222A trong Dark Mode, KHÔNG phát sáng */
+        /* Khi active: Viền #369694 dày hơn 1 tí, card màu #15222A trong Dark Mode, KHÔNG phát sáng */
         #outputContainer > div.sentence-card.active-transcript {
             border: 2px solid #369694 !important;
             box-shadow: none !important;
@@ -442,6 +443,32 @@
         </div>
     </div>
 
+    <!-- MODAL LỰA CHỌN SAO CHÉP DỮ LIỆU -->
+    <div id="copyOptionsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-md p-5 space-y-4 animate-slide-up-modal my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chọn chế độ Sao Chép</h3>
+                <button id="closeCopyOptionsModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400">Chọn định dạng mã bạn muốn sao chép để khôi phục sau này:</p>
+
+            <div class="space-y-2.5">
+                <button id="btnCopyTranslationOnly" class="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex flex-col gap-0.5">
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">1. Chỉ Sao Chép Bài Dịch & Video</span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Chỉ sao chép nội dung bài dịch và link video. Khi dán khôi phục sẽ GIỮ NGUYÊN Sổ Từ Vựng hiện tại.</span>
+                </button>
+
+                <button id="btnCopyFullPackage" class="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all flex flex-col gap-0.5">
+                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">2. Sao Chép Tất Cả (Bài Dịch + Sổ Từ Vựng)</span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Sao chép trọn gói bao gồm Bài dịch, Link Video và toàn bộ Sổ Từ Vựng đã lưu.</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- THANH NỔI 3 NÚT CHỌN TỪ -->
     <div id="selectionFloatingBar" class="fixed bottom-6 left-1/2 z-40 bg-slate-900/95 dark:bg-slate-950/95 text-white backdrop-blur-md rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-2 border border-slate-700/80 hidden transition-all animate-slide-up-floating max-w-[92vw]">
         <div class="mr-1 hidden sm:block">
@@ -542,7 +569,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu bạn đã chọn "Sao chép dữ liệu" trước đó vào đây để khôi phục lại ngay bài dịch & sổ từ vựng:</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu bạn đã chọn "Sao chép dữ liệu" trước đó vào đây để khôi phục lại bài dịch (Tự động giữ nguyên Sổ Từ Vựng nếu chọn gói chỉ bài dịch):</p>
             <textarea id="restoreInputArea" class="w-full h-32 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-mono" placeholder="Dán mã dữ liệu vào đây..."></textarea>
             <div class="flex gap-2 pt-1">
                 <button id="confirmRestoreBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
@@ -625,6 +652,11 @@
             const speedSlider = getEl('speedSlider');
             const speedValText = getEl('speedValText');
 
+            const copyOptionsModal = getEl('copyOptionsModal');
+            const closeCopyOptionsModal = getEl('closeCopyOptionsModal');
+            const btnCopyTranslationOnly = getEl('btnCopyTranslationOnly');
+            const btnCopyFullPackage = getEl('btnCopyFullPackage');
+
             const dropZoneImages = getEl('dropZoneImages');
             const fileInputImages = getEl('fileInputImages');
             const imageListContainer = getEl('imageListContainer');
@@ -679,6 +711,7 @@
                 return localStorage.getItem('gemini_api_key') || "";
             }
 
+            // --- STREAMING_CHUNK:Implementing Gemini API Calls & Youtube Player handlers... ---
             async function callGeminiApi(payload, retries = 5) {
                 const currentApiKey = getSavedApiKey();
                 
@@ -926,6 +959,7 @@
                 }
             }
 
+            // --- STREAMING_CHUNK:Implementing Smooth Follow Scroll and Transcript Highlighting... ---
             function startFollowLoop() {
                 if (followInterval) clearInterval(followInterval);
                 followInterval = setInterval(() => {
@@ -951,7 +985,7 @@
                         }
 
                         if (activeIdx !== -1 && activeIdx !== currentActiveSentenceIndex) {
-                            highlightActiveSentence(activeIdx);
+                            highlightActiveSentence(activeIdx, false); // Audio follow: scroll container strictly
                         }
                     } catch(e){}
                 }, 250);
@@ -964,14 +998,35 @@
                 }
             }
 
-            function highlightActiveSentence(index) {
+            /**
+             * Lướt mượt CHỈ TRONG KHUNG OUTPUT (KHÔNG lướt màn hình chính)
+             * Căn chỉnh sao cho câu active N nằm dưới đuôi câu N-1 (khớp hệt image_cec240.png)
+             */
+            function highlightActiveSentence(index, isManualClick = false) {
                 currentActiveSentenceIndex = index;
                 const cards = outputContainer.querySelectorAll('.sentence-card');
                 cards.forEach((card, idx) => {
                     if (idx === index) {
                         card.classList.add('active-transcript');
-                        if (isFollowEnabled) {
-                            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        
+                        // Nếu do audio tự động follow (KHÔNG phải chạm tay ngẫu nhiên) thì lướt thanh trượt trong outputContainer
+                        if (isFollowEnabled && !isManualClick) {
+                            const activeCard = card;
+                            const prevCard = cards[index - 1];
+
+                            let targetScrollTop = 0;
+                            if (prevCard) {
+                                // Lướt sao cho đoạn dịch VI câu N-1 xuất hiện phía trên vạch ngăn cách (khoảng 60-80px)
+                                targetScrollTop = activeCard.offsetTop - Math.min(prevCard.offsetHeight * 0.4, 75);
+                            } else {
+                                targetScrollTop = 0;
+                            }
+
+                            // Chỉ cuộn thanh trượt của outputContainer
+                            outputContainer.scrollTo({
+                                top: Math.max(0, targetScrollTop),
+                                behavior: 'smooth'
+                            });
                         }
                     } else {
                         card.classList.remove('active-transcript');
@@ -1287,6 +1342,7 @@ Nhiệm vụ:
                 });
             }
 
+            // --- STREAMING_CHUNK:Rendering Results and Tap Interaction Handlers... ---
             function renderResults(sentencePairs) {
                 if (!outputContainer) return;
                 outputContainer.innerHTML = '';
@@ -1344,6 +1400,8 @@ Nhiệm vụ:
                     card.appendChild(enContainer);
                     card.appendChild(viText);
 
+                    // Khi người dùng bấm tay chọn transcript ngẫu nhiên:
+                    // Đổi màu xanh chuẩn vị trí ngay lập tức, KHÔNG bắt lướt vị trí container
                     card.addEventListener('click', (e) => {
                         if (e.target.classList.contains('word-token')) return;
 
@@ -1354,7 +1412,7 @@ Nhiệm vụ:
                                 if (typeof ytPlayer.playVideo === 'function') {
                                     ytPlayer.playVideo();
                                 }
-                                highlightActiveSentence(sentenceIndex);
+                                highlightActiveSentence(sentenceIndex, true); // true = Manual tap, DO NOT force scroll jump
                             } catch(err){}
                         }
                     });
@@ -1683,11 +1741,41 @@ Trả về JSON:
                 });
             }
 
+            // --- STREAMING_CHUNK:Implementing Copy & Restore 2-Option Logic... ---
+            // MỞ MODAL LỰA CHỌN SAO CHÉP (2 OPTIONS)
             if (copySpecialDataBtn) {
                 copySpecialDataBtn.addEventListener('click', () => {
                     if (!currentSentencePairs || currentSentencePairs.length === 0) return;
-                    
-                    const fullPackage = {
+                    if (copyOptionsModal) copyOptionsModal.classList.remove('hidden');
+                });
+            }
+
+            if (closeCopyOptionsModal) {
+                closeCopyOptionsModal.addEventListener('click', () => copyOptionsModal.classList.add('hidden'));
+            }
+
+            // OPTION 1: CHỈ SAO CHÉP BÀI DỊCH & VIDEO (GIỮ NGUYÊN SỔ TỪ VỰNG KHI DÁN KHÔI PHỤC)
+            if (btnCopyTranslationOnly) {
+                btnCopyTranslationOnly.addEventListener('click', () => {
+                    const packageOnly = {
+                        type: 'translation_only',
+                        sentencePairs: currentSentencePairs,
+                        youtubeUrl: ytModalUrlInput ? ytModalUrlInput.value.trim() : '',
+                        followEnabled: isFollowEnabled,
+                        playbackSpeed: currentPlaybackSpeed
+                    };
+
+                    copyToClipboard(JSON.stringify(packageOnly));
+                    if (copyOptionsModal) copyOptionsModal.classList.add('hidden');
+                    showToast('Đã chép Mã Bài Dịch! Khi dán khôi phục sẽ GIỮ NGUYÊN Sổ từ vựng.');
+                });
+            }
+
+            // OPTION 2: SAO CHÉP TẤT CẢ (BÀI DỊCH + SỔ TỪ VỰNG)
+            if (btnCopyFullPackage) {
+                btnCopyFullPackage.addEventListener('click', () => {
+                    const packageFull = {
+                        type: 'full_package',
                         sentencePairs: currentSentencePairs,
                         vocabLibrary: vocabLibrary,
                         youtubeUrl: ytModalUrlInput ? ytModalUrlInput.value.trim() : '',
@@ -1695,17 +1783,19 @@ Trả về JSON:
                         playbackSpeed: currentPlaybackSpeed
                     };
 
-                    const specialJsonString = JSON.stringify(fullPackage);
-
-                    const temp = document.createElement('textarea');
-                    temp.value = specialJsonString;
-                    document.body.appendChild(temp);
-                    temp.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(temp);
-
-                    showToast('Đã sao chép mã dữ liệu bài dịch, Video & Sổ từ vựng!');
+                    copyToClipboard(JSON.stringify(packageFull));
+                    if (copyOptionsModal) copyOptionsModal.classList.add('hidden');
+                    showToast('Đã chép Mã Trọn Gói (Bài dịch + Sổ từ vựng)!');
                 });
+            }
+
+            function copyToClipboard(str) {
+                const temp = document.createElement('textarea');
+                temp.value = str;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
             }
 
             function openRestoreModal() {
@@ -1717,6 +1807,7 @@ Trả về JSON:
             if (emptyRestoreBtn) emptyRestoreBtn.addEventListener('click', openRestoreModal);
             if (closeRestoreModal) closeRestoreModal.addEventListener('click', () => restoreModal.classList.add('hidden'));
 
+            // KHÔI PHỤC DỮ LIỆU THÔNG MINH
             if (confirmRestoreBtn) {
                 confirmRestoreBtn.addEventListener('click', () => {
                     const pastedText = restoreInputArea ? restoreInputArea.value.trim() : '';
@@ -1726,6 +1817,7 @@ Trả về JSON:
                         const parsedData = JSON.parse(pastedText);
                         let restoredPairs = [];
                         let restoredVocab = null;
+                        const isTranslationOnly = (parsedData.type === 'translation_only');
 
                         if (Array.isArray(parsedData)) {
                             restoredPairs = parsedData;
@@ -1771,7 +1863,8 @@ Trả về JSON:
                             renderResults(restoredPairs);
                         }
 
-                        if (restoredVocab && restoredVocab.length > 0) {
+                        // Nếu là gói Chép Bài Dịch (translation_only), GIỮ NGUYÊN Sổ Từ Vựng hiện tại [X, Y, Z]!
+                        if (!isTranslationOnly && restoredVocab && restoredVocab.length > 0) {
                             const existingIds = new Set(vocabLibrary.map(v => v.id));
                             restoredVocab.forEach(item => {
                                 if (!existingIds.has(item.id)) {
@@ -1784,7 +1877,7 @@ Trả về JSON:
                         }
 
                         if (restoreModal) restoreModal.classList.add('hidden');
-                        showToast('Khôi phục bài dịch & sổ từ vựng thành công!');
+                        showToast(isTranslationOnly ? 'Đã khôi phục bài dịch! (Sổ từ vựng được giữ nguyên).' : 'Khôi phục bài dịch & sổ từ vựng thành công!');
                     } catch (e) {
                         showToast('Mã dữ liệu không đúng định dạng khôi phục.', true);
                     }
@@ -1801,12 +1894,7 @@ Trả về JSON:
                         if (en) text += `${en}\n${vi}\n\n`;
                     });
 
-                    const temp = document.createElement('textarea');
-                    temp.value = text.trim();
-                    document.body.appendChild(temp);
-                    temp.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(temp);
+                    copyToClipboard(text.trim());
                     showToast('Đã sao chép văn bản bài dịch!');
                 });
             }
