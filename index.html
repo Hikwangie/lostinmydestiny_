@@ -1240,14 +1240,17 @@ Nhiệm vụ:
 
                     systemPrompt = `Bạn là chuyên gia dịch thuật và xử lý transcript YouTube Anh - Việt.
 Nhiệm vụ:
-1. Nhận transcript tiếng Anh có mốc thời gian (ví dụ 00:16, 06:26...).
-2. Bắt buộc GIỮ NGUYÊN từng mốc thời gian theo đúng từng dòng transcript gốc (KHÔNG gộp hay nối câu theo dấu chấm). Mỗi mốc thời gian tạo thành 1 dòng transcript riêng biệt.
-3. Làm sạch các thẻ '[music]' hoặc '[Music]': Nếu dòng transcript có kèm các từ/chữ khác ngoài '[music]', hãy BỎ hẳn nhãn '[music]' đó đi để câu không bị vỡ. Nếu một dòng transcript CHỈ CHỨA DUY NHẤT từ '[music]', hãy GIỮ NGUYÊN dòng đó.
-4. Trả về định dạng JSON Array chứa các phần tử:
-   - "time": Mốc thời gian nguyên bản (ví dụ "00:16", "06:26").
-   - "seconds": Thời gian tính bằng giây quy đổi ra số (ví dụ 16, 386).
-   - "en": Câu/Cụm từ tiếng Anh đã làm sạch [music] thừa.
-   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
+1. Nhận transcript tiếng Anh thô có mốc thời gian (ví dụ: 0:00, 0:05, 0:07...).
+2. BẮT BUỘC GIỮ NGUYÊN 100% TỪNG MỐC THỜI GIAN VÀ CỤM TIẾNG ANH ĐI KÈM CỦA DÒNG ĐÓ. KHÔNG ĐƯỢC gộp các mốc thời gian lại với nhau, KHÔNG ĐƯỢC tách hay biến đổi thành các câu mới theo dấu chấm.
+3. Dịch từng cụm tiếng Anh tương ứng với mốc thời gian đó sang tiếng Việt một cách tự nhiên theo ngữ cảnh toàn bài.
+4. Xử lý nhãn '[music]' / '[Music]':
+   - Nếu dòng transcript có kèm các từ/chữ khác ngoài '[music]', hãy BỎ hẳn nhãn '[music]' đó đi để cụm từ không bị vỡ.
+   - Nếu dòng transcript CHỈ CHỨA DUY NHẤT từ '[music]', hãy GIỮ NGUYÊN dòng đó và dịch "vi" là "[Âm nhạc]".
+5. Trả về định dạng JSON Array chứa các phần tử:
+   - "time": Mốc thời gian nguyên bản (ví dụ "00:07", "01:14").
+   - "seconds": Thời gian tính bằng giây quy đổi ra số (ví dụ 7, 74).
+   - "en": Cụm tiếng Anh nguyên bản tương ứng mốc thời gian (đã bỏ nhãn [music] thừa nếu có chữ đi kèm).
+   - "vi": Nghĩa tiếng Việt của cụm tiếng Anh đó.`;
 
                     responseSchema = {
                         type: "ARRAY",
