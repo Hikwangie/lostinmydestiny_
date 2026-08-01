@@ -98,12 +98,12 @@
             box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
         }
 
-        /* Biến font-size & spacing động cho khung Output (Mặc định EN: 114%, VI: 113%, Gap: 0px) */
+        /* Biến font-size & spacing động cho khung Output (Mặc định EN: 114%, VI: 113%, Gap: 0px, PairGap: 0px) */
         #outputContainer {
             --font-en-scale: 1.14;
             --font-vi-scale: 1.13;
             --card-gap: 0px;
-            --pair-gap: 4px;
+            --pair-gap: 0px;
             scroll-behavior: smooth;
         }
 
@@ -138,8 +138,8 @@
 
         .vi-text {
             font-size: calc(0.75rem * var(--font-vi-scale, 1.13)) !important;
-            margin-top: var(--pair-gap, 4px) !important;
-            padding-top: var(--pair-gap, 4px) !important;
+            margin-top: var(--pair-gap, 0px) !important;
+            padding-top: var(--pair-gap, 0px) !important;
         }
 
         #outputContainer.hide-vi .vi-text {
@@ -220,7 +220,7 @@
             <!-- Cột Trái: Input -->
             <div id="inputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] transition-all overflow-hidden">
                 
-                <div class="flex items-center justify-between mb-2 flex-shrink-0">
+                <div id="inputCardHeader" class="flex items-center justify-between mb-2 flex-shrink-0">
                     <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Nhập liệu đầu vào:</span>
                     <div class="flex items-center gap-2">
                         <button id="clearAllInputBtn" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium transition-colors flex items-center gap-1">
@@ -255,7 +255,7 @@
                     
                     <!-- Khung phát Video YouTube (~1/4 diện tích) -->
                     <div id="ytPlayerContainer" class="w-full h-44 sm:h-52 bg-black rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                        <p class="text-xs text-slate-500 text-center px-4">Dán Link YouTube & Transcript ở ô bên dưới rồi nhấn <b>Dịch & Nối câu</b></p>
+                        <p class="text-xs text-slate-500 text-center px-4">Nhấn <b>"Chỉnh sửa, đổi Video & Transcript"</b> ở bên dưới để nhập link và bài nói</p>
                     </div>
 
                     <!-- Thanh Điều khiển YouTube (Follow + Tốc độ) -->
@@ -271,21 +271,36 @@
                         </div>
                     </div>
 
-                    <!-- Ô dán Link & Transcript trực tiếp trong cột trái -->
-                    <div class="space-y-2 flex-shrink-0">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">1. Link Video YouTube (không bắt buộc):</label>
-                            <input type="text" id="ytUrlInput" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 font-mono" placeholder="https://youtu.be/...">
-                        </div>
+                    <!-- Nút mở Modal Nhập Link & Transcript -->
+                    <button id="openYtEditModalBtn" class="w-full bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-600 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        <span>Chỉnh sửa, đổi Video & Transcript</span>
+                    </button>
 
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">2. Transcript bài nói (không bắt buộc):</label>
-                            <textarea id="ytTranscriptInput" class="w-full h-24 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none font-mono" placeholder="Dán transcript bài nói vào đây...&#10;&#10;00:16 that combined cultural&#10;00:19 values with unique tour&#10;00:22 digital technology&#10;00:24 features promotional aimed at"></textarea>
-                        </div>
+                    <!-- Toàn bộ NÚT TÁC VỤ (Nghĩa Việt, Chỉnh giao diện, Dán khôi phục, Sao chép) đưa xuống bên dưới Video YouTube -->
+                    <div id="ytActionButtonsRow" class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-100 dark:border-slate-700/80 flex-shrink-0">
+                        <button id="ytToggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2.5 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600">
+                            <span class="ytToggleViIcon">👁️</span> <span class="ytToggleViText">Nghĩa Việt</span>
+                        </button>
+
+                        <button id="ytToggleSlidersBtn" class="text-[11px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60" title="Chỉnh cỡ chữ & khoảng cách">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>Chỉnh giao diện</span>
+                        </button>
+
+                        <button id="ytRestoreDataBtn" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60" title="Dán dữ liệu đã chép để khôi phục">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
+                            <span>Dán khôi phục</span>
+                        </button>
+
+                        <button id="ytCopySpecialBtn" class="text-[11px] text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60" title="Sao chép toàn bộ dữ liệu">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            <span>Sao chép dữ liệu</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Nút bấm dịch -->
+                <!-- Nút bấm dịch chuẩn cho Tab Text & Tab Ảnh -->
                 <button id="translateBtn" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
                     <span>Dịch & Nối câu</span>
@@ -295,70 +310,64 @@
             <!-- Cột Phải: Kết quả Output -->
             <div id="outputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] relative transition-all lg:col-span-1 overflow-hidden">
                 
-                <div class="flex items-center justify-between mb-2 flex-wrap gap-2 flex-shrink-0">
-                    <div class="flex items-center gap-2">
-                        <button id="expandInputBtn" class="hidden text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2.5 py-1 rounded-lg font-medium transition-all items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                            <span>Hiện nhập liệu</span>
-                        </button>
-                        
-                        <h2 class="font-semibold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-1.5">
-                            <span>Kết quả song ngữ</span>
-                            <span class="text-[11px] font-normal text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Chạm từ để chọn</span>
-                        </h2>
-                    </div>
+                <!-- Thanh công cụ Output (Đảm bảo 4 nút vừa vặn trên NẰM TRÊN CÙNG MỘT HÀNG ở chế độ Văn bản & Nhiều hình ảnh) -->
+                <div id="outputTopBar" class="flex items-center justify-between mb-2 flex-nowrap overflow-x-auto gap-1.5 flex-shrink-0 pb-1">
+                    <button id="expandInputBtn" class="hidden text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all items-center gap-1 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        <span>Hiện nhập liệu</span>
+                    </button>
 
-                    <!-- Toàn bộ công cụ (Nghĩa Việt, Chỉnh giao diện, Dán khôi phục, Sao chép dữ liệu) ở trên cùng Output -->
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <button id="toggleViTextBtn" class="text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2.5 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600">
-                            <span id="toggleViIcon">👁️</span> <span id="toggleViText">Nghĩa Việt</span>
+                    <!-- Row chứa 4 nút công cụ nằm trên 1 hàng duy nhất cho tab Văn bản & Ảnh -->
+                    <div id="topActionButtonsGroup" class="flex items-center gap-1 flex-nowrap w-full justify-between">
+                        <button id="toggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600 flex-shrink-0 whitespace-nowrap">
+                            <span class="toggleViIcon">👁️</span> <span class="toggleViText">Nghĩa Việt</span>
                         </button>
 
-                        <button id="toggleSlidersMenuBtn" class="text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60" title="Chỉnh cỡ chữ & khoảng cách">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <button id="toggleSlidersMenuBtn" class="text-[11px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60 flex-shrink-0 whitespace-nowrap" title="Chỉnh cỡ chữ & khoảng cách">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                             <span>Chỉnh giao diện</span>
                         </button>
 
-                        <button id="restoreDataBtn" class="text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60" title="Dán dữ liệu đã chép để khôi phục">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
+                        <button id="restoreDataBtn" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60 flex-shrink-0 whitespace-nowrap" title="Dán dữ liệu đã chép để khôi phục">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
                             <span>Dán khôi phục</span>
                         </button>
 
-                        <button id="copySpecialDataBtn" class="text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60" title="Sao chép toàn bộ dữ liệu">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <button id="copySpecialDataBtn" class="text-[11px] text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60 flex-shrink-0 whitespace-nowrap" title="Sao chép toàn bộ dữ liệu">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                             <span>Sao chép dữ liệu</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Panel Sliders (Mặc định Font EN: 114%, VI: 113%, Min Gap: 0px) -->
-                <div id="settingsSlidersPanel" class="bg-white dark:bg-slate-950/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 hidden animate-slide-up-modal flex-shrink-0">
-                    <div class="flex items-center justify-between gap-3 flex-wrap">
-                        <div class="flex items-center gap-2 flex-1 min-w-[120px]">
+                <!-- Panel Sliders (Chữ nhỏ gọn, Mặc định EN: 114%, VI: 113%, Min Gap: 0px, Mặc định cách Anh-Việt: 0px) -->
+                <div id="settingsSlidersPanel" class="bg-white dark:bg-slate-950/80 p-2 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5 hidden animate-slide-up-modal flex-shrink-0 text-[11px]">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-[110px]">
                             <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Chữ EN: <b id="fontEnVal" class="text-blue-600 dark:text-blue-400 font-mono">114%</b></span>
-                            <input type="range" id="fontEnSlider" min="50" max="200" value="114" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                            <input type="range" id="fontEnSlider" min="50" max="200" value="114" step="1" class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
                         </div>
-                        <div class="flex items-center gap-2 flex-1 min-w-[120px]">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-[110px]">
                             <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Chữ VI: <b id="fontViVal" class="text-emerald-600 dark:text-emerald-400 font-mono">113%</b></span>
-                            <input type="range" id="fontViSlider" min="50" max="200" value="113" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                            <input type="range" id="fontViSlider" min="50" max="200" value="113" step="1" class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between gap-3 flex-wrap border-t border-slate-200/60 dark:border-slate-800 pt-2">
-                        <div class="flex items-center gap-2 flex-1 min-w-[130px]">
+                    <div class="flex items-center justify-between gap-2 flex-wrap border-t border-slate-200/60 dark:border-slate-800 pt-1.5">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-[120px]">
                             <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Cách câu: <b id="cardGapVal" class="text-purple-600 dark:text-purple-400 font-mono">0px</b></span>
-                            <input type="range" id="cardGapSlider" min="0" max="50" value="0" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                            <input type="range" id="cardGapSlider" min="0" max="50" value="0" step="1" class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600">
                         </div>
-                        <div class="flex items-center gap-2 flex-1 min-w-[130px]">
-                            <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Cách Anh-Việt: <b id="pairGapVal" class="text-amber-600 dark:text-amber-400 font-mono">4px</b></span>
-                            <input type="range" id="pairGapSlider" min="0" max="30" value="4" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                        <div class="flex items-center gap-1.5 flex-1 min-w-[120px]">
+                            <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Cách Anh-Việt: <b id="pairGapVal" class="text-amber-600 dark:text-amber-400 font-mono">0px</b></span>
+                            <input type="range" id="pairGapSlider" min="0" max="30" value="0" step="1" class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
                         </div>
                     </div>
                 </div>
 
-                <div id="outputContainer" class="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-y-auto space-y-3">
+                <div id="outputContainer" class="w-full flex-1 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-y-auto space-y-3">
                     <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center px-4 space-y-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-40"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-40"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                         <p class="text-xs">Chưa có dữ liệu dịch. Hãy nhập nội dung và nhấn <b>Dịch & Nối câu</b>.</p>
                         <button id="emptyRestoreBtn" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
@@ -370,6 +379,40 @@
 
         </div>
     </main>
+
+    <!-- MODAL NHẬP LINK YOUTUBE & TRANSCRIPT BÀI NÓI (MỞ KHI BẤM "Chỉnh sửa, đổi Video & Transcript") -->
+    <div id="ytEditModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-4 animate-slide-up-modal my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🎥</span>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chỉnh sửa Video & Transcript YouTube</h3>
+                </div>
+                <button id="closeYtEditModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">1. Link Video YouTube (không bắt buộc):</label>
+                    <input type="text" id="ytUrlInput" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 font-mono" placeholder="https://youtu.be/...">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">2. Transcript bài nói (không bắt buộc):</label>
+                    <textarea id="ytTranscriptInput" class="w-full h-36 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none font-mono" placeholder="Dán transcript bài nói vào đây...&#10;&#10;00:16 that combined cultural&#10;00:19 values with unique tour&#10;00:22 digital technology&#10;00:24 features promotional aimed at"></textarea>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+                <button id="modalYtTranslateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                    <span>Dịch & Nối câu</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL API KEY GEMINI -->
     <div id="apiKeyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
@@ -588,8 +631,6 @@
             const fontEnVal = getEl('fontEnVal');
             const fontViVal = getEl('fontViVal');
             const toggleViTextBtn = getEl('toggleViTextBtn');
-            const toggleViIcon = getEl('toggleViIcon');
-            const toggleViText = getEl('toggleViText');
             const cardGapSlider = getEl('cardGapSlider');
             const cardGapVal = getEl('cardGapVal');
             const pairGapSlider = getEl('pairGapSlider');
@@ -602,6 +643,17 @@
             const toggleFollowBtn = getEl('toggleFollowBtn');
             const speedSlider = getEl('speedSlider');
             const speedValText = getEl('speedValText');
+
+            const openYtEditModalBtn = getEl('openYtEditModalBtn');
+            const ytEditModal = getEl('ytEditModal');
+            const closeYtEditModal = getEl('closeYtEditModal');
+            const modalYtTranslateBtn = getEl('modalYtTranslateBtn');
+
+            const ytToggleViTextBtn = getEl('ytToggleViTextBtn');
+            const ytToggleSlidersBtn = getEl('ytToggleSlidersBtn');
+            const ytRestoreDataBtn = getEl('ytRestoreDataBtn');
+            const ytCopySpecialBtn = getEl('ytCopySpecialBtn');
+            const topActionButtonsGroup = getEl('topActionButtonsGroup');
 
             const copyOptionsModal = getEl('copyOptionsModal');
             const closeCopyOptionsModal = getEl('closeCopyOptionsModal');
@@ -633,7 +685,6 @@
             const restoreInputArea = getEl('restoreInputArea');
             const confirmRestoreBtn = getEl('confirmRestoreBtn');
 
-            // --- THEME TỐI / SÁNG ---
             function applyTheme(isDark) {
                 if (isDark) {
                     document.documentElement.classList.add('dark');
@@ -791,6 +842,12 @@
                 });
             }
 
+            if (ytToggleSlidersBtn && settingsSlidersPanel) {
+                ytToggleSlidersBtn.addEventListener('click', () => {
+                    settingsSlidersPanel.classList.toggle('hidden');
+                });
+            }
+
             if (fontEnSlider && fontEnVal) {
                 fontEnSlider.addEventListener('input', (e) => {
                     const val = e.target.value;
@@ -807,24 +864,24 @@
                 });
             }
 
-            if (toggleViTextBtn) {
-                toggleViTextBtn.addEventListener('click', () => {
-                    isViHidden = !isViHidden;
-                    if (isViHidden) {
-                        outputContainer.classList.add('hide-vi');
-                        if (toggleViIcon) toggleViIcon.textContent = '🙈';
-                        if (toggleViText) toggleViText.textContent = 'Ẩn nghĩa VI';
-                        toggleViTextBtn.classList.remove('bg-slate-100', 'dark:bg-slate-700');
-                        toggleViTextBtn.classList.add('bg-amber-100', 'dark:bg-amber-950/80', 'text-amber-700', 'dark:text-amber-300');
-                    } else {
-                        outputContainer.classList.remove('hide-vi');
-                        if (toggleViIcon) toggleViIcon.textContent = '👁️';
-                        if (toggleViText) toggleViText.textContent = 'Nghĩa Việt';
-                        toggleViTextBtn.classList.add('bg-slate-100', 'dark:bg-slate-700');
-                        toggleViTextBtn.classList.remove('bg-amber-100', 'dark:bg-amber-950/80', 'text-amber-700', 'dark:text-amber-300');
-                    }
-                });
+            function toggleViTextAction() {
+                isViHidden = !isViHidden;
+                const icons = document.querySelectorAll('.toggleViIcon, .ytToggleViIcon');
+                const texts = document.querySelectorAll('.toggleViText, .ytToggleViText');
+
+                if (isViHidden) {
+                    outputContainer.classList.add('hide-vi');
+                    icons.forEach(i => i.textContent = '🙈');
+                    texts.forEach(t => t.textContent = 'Ẩn nghĩa VI');
+                } else {
+                    outputContainer.classList.remove('hide-vi');
+                    icons.forEach(i => i.textContent = '👁️');
+                    texts.forEach(t => t.textContent = 'Nghĩa Việt');
+                }
             }
+
+            if (toggleViTextBtn) toggleViTextBtn.addEventListener('click', toggleViTextAction);
+            if (ytToggleViTextBtn) ytToggleViTextBtn.addEventListener('click', toggleViTextAction);
 
             if (cardGapSlider && cardGapVal) {
                 cardGapSlider.addEventListener('input', (e) => {
@@ -900,7 +957,7 @@
                         }
 
                         if (activeIdx !== -1 && activeIdx !== currentActiveSentenceIndex) {
-                            highlightActiveSentence(activeIdx, false); // Audio follow: scroll container strictly according to rule
+                            highlightActiveSentence(activeIdx, false);
                         }
                     } catch(e){}
                 }, 250);
@@ -913,11 +970,6 @@
                 }
             }
 
-            /**
-             * Quy tắc cuộn chính xác chỉ trong khung output:
-             * - Câu 0 (câu đầu tiên): scrollTop = 0.
-             * - Câu N (N > 0): Cuộn sao cho vạch ngăn cách E-V của câu N-1 trùng khít với viền trên cùng của outputContainer!
-             */
             function highlightActiveSentence(index, isManualClick = false) {
                 currentActiveSentenceIndex = index;
                 const cards = outputContainer.querySelectorAll('.sentence-card');
@@ -1000,7 +1052,7 @@
                     renderImageList();
                     if (ytUrlInput) ytUrlInput.value = '';
                     if (ytTranscriptInput) ytTranscriptInput.value = '';
-                    if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<p class="text-xs text-slate-500 text-center px-4">Dán Link YouTube & Transcript ở ô bên dưới rồi nhấn <b>Dịch & Nối câu</b></p>`;
+                    if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<p class="text-xs text-slate-500 text-center px-4">Nhấn <b>"Chỉnh sửa, đổi Video & Transcript"</b> ở bên dưới để nhập link và bài nói</p>`;
                     try { if (ytPlayer) ytPlayer.destroy(); } catch(e){}
                     ytPlayer = null;
                     showToast('Đã làm sạch toàn bộ dữ liệu nhập.');
@@ -1022,8 +1074,28 @@
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
                     const targetEl = getEl(targetTab);
                     if (targetEl) targetEl.classList.remove('hidden');
+
+                    if (targetTab === 'tab-youtube') {
+                        if (topActionButtonsGroup) topActionButtonsGroup.classList.add('hidden');
+                        if (translateBtn) translateBtn.classList.add('hidden');
+                    } else {
+                        if (topActionButtonsGroup) topActionButtonsGroup.classList.remove('hidden');
+                        if (translateBtn) translateBtn.classList.remove('hidden');
+                    }
                 });
             });
+
+            if (openYtEditModalBtn) {
+                openYtEditModalBtn.addEventListener('click', () => {
+                    if (ytEditModal) ytEditModal.classList.remove('hidden');
+                });
+            }
+
+            if (closeYtEditModal) {
+                closeYtEditModal.addEventListener('click', () => {
+                    if (ytEditModal) ytEditModal.classList.add('hidden');
+                });
+            }
 
             if (dropZoneImages && fileInputImages) {
                 dropZoneImages.addEventListener('click', () => fileInputImages.click());
@@ -1182,6 +1254,7 @@ Nhiệm vụ:
 
                     if (!transcriptText) {
                         showToast('Đã tải video YouTube.');
+                        if (ytEditModal) ytEditModal.classList.add('hidden');
                         return;
                     }
 
@@ -1226,6 +1299,11 @@ Nhiệm vụ:
                     translateBtn.innerHTML = `<div class="loader"></div> <span>Đang phân tích & dịch...</span>`;
                     translateBtn.disabled = true;
                 }
+                if (modalYtTranslateBtn) {
+                    modalYtTranslateBtn.innerHTML = `<div class="loader"></div> <span>Đang phân tích & dịch...</span>`;
+                    modalYtTranslateBtn.disabled = true;
+                }
+
                 if (emptyState) emptyState.style.display = 'none';
                 if (outputContainer) outputContainer.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-12"><div class="loader mb-2"></div><p class="text-xs">AI đang đọc nối câu và dịch ngữ cảnh...</p></div>`;
 
@@ -1246,6 +1324,7 @@ Nhiệm vụ:
                     if (activeTabId === 'tab-youtube') {
                         isFollowEnabled = true;
                         updateFollowBtnUI();
+                        if (ytEditModal) ytEditModal.classList.add('hidden');
                     }
 
                 } catch (err) {
@@ -1255,6 +1334,10 @@ Nhiệm vụ:
                     if (translateBtn) {
                         translateBtn.innerHTML = origText;
                         translateBtn.disabled = false;
+                    }
+                    if (modalYtTranslateBtn) {
+                        modalYtTranslateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg><span>Dịch & Nối câu</span>`;
+                        modalYtTranslateBtn.disabled = false;
                     }
                 }
             }
@@ -1267,6 +1350,12 @@ Nhiệm vụ:
                 });
             }
 
+            if (modalYtTranslateBtn) {
+                modalYtTranslateBtn.addEventListener('click', () => {
+                    executeTranslation('tab-youtube');
+                });
+            }
+
             function renderResults(sentencePairs) {
                 if (!outputContainer) return;
                 outputContainer.innerHTML = '';
@@ -1275,6 +1364,7 @@ Nhiệm vụ:
                 if (!sentencePairs || sentencePairs.length === 0) {
                     if (emptyState) outputContainer.appendChild(emptyState);
                     if (copySpecialDataBtn) copySpecialDataBtn.classList.add('hidden');
+                    if (ytCopySpecialBtn) ytCopySpecialBtn.classList.add('hidden');
                     return;
                 }
 
@@ -1333,7 +1423,7 @@ Nhiệm vụ:
                                 if (typeof ytPlayer.playVideo === 'function') {
                                     ytPlayer.playVideo();
                                 }
-                                highlightActiveSentence(sentenceIndex, true); // true = manual click, no auto-jump scroll
+                                highlightActiveSentence(sentenceIndex, true);
                             } catch(err){}
                         }
                     });
@@ -1344,6 +1434,10 @@ Nhiệm vụ:
                 if (copySpecialDataBtn) {
                     copySpecialDataBtn.classList.remove('hidden');
                     copySpecialDataBtn.classList.add('flex');
+                }
+                if (ytCopySpecialBtn) {
+                    ytCopySpecialBtn.classList.remove('hidden');
+                    ytCopySpecialBtn.classList.add('flex');
                 }
             }
 
@@ -1661,12 +1755,13 @@ Trả về JSON:
                 });
             }
 
-            if (copySpecialDataBtn) {
-                copySpecialDataBtn.addEventListener('click', () => {
-                    if (!currentSentencePairs || currentSentencePairs.length === 0) return;
-                    if (copyOptionsModal) copyOptionsModal.classList.remove('hidden');
-                });
+            function triggerCopyModal() {
+                if (!currentSentencePairs || currentSentencePairs.length === 0) return;
+                if (copyOptionsModal) copyOptionsModal.classList.remove('hidden');
             }
+
+            if (copySpecialDataBtn) copySpecialDataBtn.addEventListener('click', triggerCopyModal);
+            if (ytCopySpecialBtn) ytCopySpecialBtn.addEventListener('click', triggerCopyModal);
 
             if (closeCopyOptionsModal) {
                 closeCopyOptionsModal.addEventListener('click', () => copyOptionsModal.classList.add('hidden'));
@@ -1720,6 +1815,7 @@ Trả về JSON:
             }
 
             if (restoreDataBtn) restoreDataBtn.addEventListener('click', openRestoreModal);
+            if (ytRestoreDataBtn) ytRestoreDataBtn.addEventListener('click', openRestoreModal);
             if (emptyRestoreBtn) emptyRestoreBtn.addEventListener('click', openRestoreModal);
             if (closeRestoreModal) closeRestoreModal.addEventListener('click', () => restoreModal.classList.add('hidden'));
 
@@ -1755,6 +1851,9 @@ Trả về JSON:
                                 document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
                                 const tabYt = getEl('tab-youtube');
                                 if (tabYt) tabYt.classList.remove('hidden');
+
+                                if (topActionButtonsGroup) topActionButtonsGroup.classList.add('hidden');
+                                if (translateBtn) translateBtn.classList.add('hidden');
                             }
 
                             if (parsedData.playbackSpeed) {
