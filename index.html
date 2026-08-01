@@ -656,28 +656,41 @@
 
             /* Theme Toggle logic (Fast transition, Instant toggle) */
             function applyTheme(isDark) {
-                if (isDark) {
-                    document.documentElement.classList.add('dark');
-                    if (themeIconSun) themeIconSun.classList.remove('hidden');
-                    if (themeIconMoon) themeIconMoon.classList.add('hidden');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    if (themeIconSun) themeIconSun.classList.add('hidden');
-                    if (themeIconMoon) themeIconMoon.classList.remove('hidden');
-                }
+                try {
+                    if (isDark) {
+                        document.documentElement.classList.add('dark');
+                        if (document.body) document.body.classList.add('dark');
+                        if (themeIconSun) themeIconSun.classList.remove('hidden');
+                        if (themeIconMoon) themeIconMoon.classList.add('hidden');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        if (document.body) document.body.classList.remove('dark');
+                        if (themeIconSun) themeIconSun.classList.add('hidden');
+                        if (themeIconMoon) themeIconMoon.classList.remove('hidden');
+                    }
+                } catch(e) {}
             }
 
-            const savedTheme = localStorage.getItem('theme');
+            let savedTheme = null;
+            try {
+                savedTheme = localStorage.getItem('theme');
+            } catch(e) {}
+            
             let isDarkMode = savedTheme !== null ? savedTheme === 'dark' : true;
             applyTheme(isDarkMode);
 
             if (themeToggleBtn) {
-                themeToggleBtn.onclick = function(e) {
-                    if (e) e.preventDefault();
+                themeToggleBtn.addEventListener('click', (e) => {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
                     isDarkMode = !isDarkMode;
-                    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                    try {
+                        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                    } catch(err) {}
                     applyTheme(isDarkMode);
-                };
+                });
             }
 
             function getSavedApiKey() {
