@@ -984,18 +984,16 @@
                                     behavior: 'smooth'
                                 });
                             } else {
-                                const prevCard = cards[index - 1];
-                                if (prevCard) {
-                                    const viTextPrev = prevCard.querySelector('.vi-text');
-                                    let targetScrollTop = prevCard.offsetTop;
-                                    if (viTextPrev) {
-                                        targetScrollTop += viTextPrev.offsetTop;
-                                    }
-                                    outputContainer.scrollTo({
-                                        top: Math.max(0, targetScrollTop),
-                                        behavior: 'smooth'
-                                    });
-                                }
+                                // Tự động lướt sao cho thẻ transcript hiện tại hiển thị trọn vẹn 100% trong khung Output
+                                const containerRect = outputContainer.getBoundingClientRect();
+                                const cardRect = card.getBoundingClientRect();
+                                const currentScroll = outputContainer.scrollTop;
+                                const targetScrollTop = cardRect.top - containerRect.top + currentScroll - 12;
+                                
+                                outputContainer.scrollTo({
+                                    top: Math.max(0, targetScrollTop),
+                                    behavior: 'smooth'
+                                });
                             }
                         }
                     } else {
