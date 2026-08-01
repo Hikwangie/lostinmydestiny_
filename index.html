@@ -98,7 +98,7 @@
             box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
         }
 
-        /* Biến font-size & spacing động cho khung Output (Mặc định EN: 114%, VI: 113%, Gap: 0px, PairGap: 0px) */
+        /* Biến font-size & spacing động cho khung Output */
         #outputContainer {
             --font-en-scale: 1.14;
             --font-vi-scale: 1.13;
@@ -186,7 +186,7 @@
                     <span class="hidden sm:inline">API Key</span>
                 </button>
 
-                <button id="themeToggleBtn" class="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all border border-slate-300 dark:border-slate-600" title="Chuyển chế độ Tối / Sáng">
+                <button id="themeToggleBtn" type="button" class="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all border border-slate-300 dark:border-slate-600" title="Chuyển chế độ Tối / Sáng">
                     <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                     <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden text-slate-600"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
                 </button>
@@ -277,7 +277,7 @@
                         <span>Chỉnh sửa, đổi Video & Transcript</span>
                     </button>
 
-                    <!-- Toàn bộ NÚT TÁC VỤ (Nghĩa Việt, Chỉnh giao diện, Dán khôi phục, Sao chép) đưa xuống bên dưới Video YouTube -->
+                    <!-- Toàn bộ NÚT TÁC VỤ đưa xuống bên dưới Video YouTube -->
                     <div id="ytActionButtonsRow" class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-100 dark:border-slate-700/80 flex-shrink-0">
                         <button id="ytToggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2.5 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600">
                             <span class="ytToggleViIcon">👁️</span> <span class="ytToggleViText">Nghĩa Việt</span>
@@ -310,7 +310,7 @@
             <!-- Cột Phải: Kết quả Output -->
             <div id="outputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] relative transition-all lg:col-span-1 overflow-hidden">
                 
-                <!-- Thanh công cụ Output (Đảm bảo 4 nút vừa vặn trên NẰM TRÊN CÙNG MỘT HÀNG ở chế độ Văn bản & Nhiều hình ảnh) -->
+                <!-- Thanh công cụ Output -->
                 <div id="outputTopBar" class="flex items-center justify-between mb-2 flex-nowrap overflow-x-auto gap-1.5 flex-shrink-0 pb-1">
                     <button id="expandInputBtn" class="hidden text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all items-center gap-1 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -340,7 +340,7 @@
                     </div>
                 </div>
 
-                <!-- Panel Sliders (Chữ nhỏ gọn, Mặc định EN: 114%, VI: 113%, Min Gap: 0px, Mặc định cách Anh-Việt: 0px) -->
+                <!-- Panel Sliders -->
                 <div id="settingsSlidersPanel" class="bg-white dark:bg-slate-950/80 p-2 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5 hidden animate-slide-up-modal flex-shrink-0 text-[11px]">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-1.5 flex-1 min-w-[110px]">
@@ -380,7 +380,7 @@
         </div>
     </main>
 
-    <!-- MODAL NHẬP LINK YOUTUBE & TRANSCRIPT BÀI NÓI (MỞ KHI BẤM "Chỉnh sửa, đổi Video & Transcript") -->
+    <!-- MODAL NHẬP LINK YOUTUBE & TRANSCRIPT BÀI NÓI -->
     <div id="ytEditModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-4 animate-slide-up-modal my-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
@@ -538,12 +538,12 @@
     <div id="restoreModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-3 animate-slide-up-modal my-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
-                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Dán dữ liệu khôi phục bài dịch & từ vựng</h3>
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Dán dữ liệu khôi phục</h3>
                 <button id="closeRestoreModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu bạn đã chọn "Sao chép dữ liệu" trước đó vào đây để khôi phục lại bài dịch (Tự động giữ nguyên Sổ Từ Vựng nếu chọn gói chỉ bài dịch):</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu khôi phục vào đây (Bài dịch sẽ được khôi phục, Sổ từ vựng cũ sẽ được giữ nguyên và bổ sung thêm từ vựng mới):</p>
             <textarea id="restoreInputArea" class="w-full h-32 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-mono" placeholder="Dán mã dữ liệu vào đây..."></textarea>
             <div class="flex gap-2 pt-1">
                 <button id="confirmRestoreBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
@@ -654,6 +654,7 @@
             const restoreInputArea = getEl('restoreInputArea');
             const confirmRestoreBtn = getEl('confirmRestoreBtn');
 
+            /* Theme Toggle logic (Fast transition, Instant toggle) */
             function applyTheme(isDark) {
                 if (isDark) {
                     document.documentElement.classList.add('dark');
@@ -667,15 +668,16 @@
             }
 
             const savedTheme = localStorage.getItem('theme');
-            let isDarkMode = savedTheme ? savedTheme === 'dark' : true;
+            let isDarkMode = savedTheme !== null ? savedTheme === 'dark' : true;
             applyTheme(isDarkMode);
 
             if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', () => {
+                themeToggleBtn.onclick = function(e) {
+                    if (e) e.preventDefault();
                     isDarkMode = !isDarkMode;
                     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
                     applyTheme(isDarkMode);
-                });
+                };
             }
 
             function getSavedApiKey() {
@@ -918,7 +920,7 @@
                         for (let i = 0; i < currentSentencePairs.length; i++) {
                             const pair = currentSentencePairs[i];
                             const sec = pair.seconds !== undefined ? pair.seconds : parseTimeToSeconds(pair.time);
-                            // Trễ hơn 0.5s so với thời gian hiện tại của video
+                            // Nhận trễ 0.5s so với thời gian hiện tại của video
                             if (sec <= currentTime - 0.5) {
                                 activeIdx = i;
                             } else {
@@ -948,23 +950,18 @@
                         card.classList.add('active-transcript');
                         
                         if (isFollowEnabled && !isManualClick) {
-                            if (index === 0) {
-                                outputContainer.scrollTo({
-                                    top: 0,
-                                    behavior: 'smooth'
-                                });
-                            } else {
-                                // Tự động lướt sao cho thẻ transcript hiện tại hiển thị trọn vẹn 100% trong khung Output
-                                const containerRect = outputContainer.getBoundingClientRect();
-                                const cardRect = card.getBoundingClientRect();
-                                const currentScroll = outputContainer.scrollTop;
-                                const targetScrollTop = cardRect.top - containerRect.top + currentScroll - 12;
-                                
-                                outputContainer.scrollTo({
-                                    top: Math.max(0, targetScrollTop),
-                                    behavior: 'smooth'
-                                });
-                            }
+                            // Tự động lướt hiển thị trọn vẹn 100% thẻ transcript đang phát trong khung Output
+                            const containerRect = outputContainer.getBoundingClientRect();
+                            const cardRect = card.getBoundingClientRect();
+                            const currentScroll = outputContainer.scrollTop;
+                            
+                            // Căn chỉnh sao cho thẻ hiển thị thoải mái đầy đủ không bị đè cạnh
+                            const targetScrollTop = cardRect.top - containerRect.top + currentScroll - 12;
+                            
+                            outputContainer.scrollTo({
+                                top: Math.max(0, targetScrollTop),
+                                behavior: 'smooth'
+                            });
                         }
                     } else {
                         card.classList.remove('active-transcript');
