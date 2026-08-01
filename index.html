@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dịch Song Ngữ & Tra Từ Vựng Context</title>
+    <!-- Google Font: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- SheetJS (XLSX) cho xuất file Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .word-token {
+            display: inline-block;
+            padding: 1px 3px;
+            margin: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background-color 0.15s ease;
+            word-break: break-word;
+        }
+
+        .word-token:hover {
+            background-color: #e2e8f0;
+        }
+
+        .dark .word-token:hover {
+            background-color: #1e293b;
+        }
+
+        .word-token.selected {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Biến font-size & spacing động cho khung Output */
+        #outputContainer {
+            --font-en-scale: 1;
+            --font-vi-scale: 1;
+            --card-gap: 12px;
+            --pair-gap: 4px;
+        }
+
+        /* Thẻ transcript mặc định */
+        #outputContainer > div.sentence-card {
+            margin-bottom: var(--card-gap, 12px) !important;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+            background-color: #ffffff;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .dark #outputContainer > div.sentence-card {
+            background-color: #0C1115 !important;
+            border: 1.5px solid transparent !important;
+        }
+
+        /* Khi active: Viền #369694 dày hơn 1 xíu, card màu #15222A trong Dark Mode, KHÔNG phát sáng */
+        #outputContainer > div.sentence-card.active-transcript {
+            border: 2px solid #369694 !important;
+            box-shadow: none !important;
+            background-color: #ccfbf1 !important;
+        }
+
+        .dark #outputContainer > div.sentence-card.active-transcript {
+            border: 2px solid #369694 !important;
+            box-shadow: none !important;
+            background-color: #15222A !important;
+        }
+
+        .en-container {
+            font-size: calc(0.875rem * var(--font-en-scale, 1)) !important;
+        }
+
+        .vi-text {
+            font-size: calc(0.75rem * var(--font-vi-scale, 1)) !important;
+            margin-top: var(--pair-gap, 4px) !important;
+            padding-top: var(--pair-gap, 4px) !important;
+        }
+
+        #outputContainer.hide-vi .vi-text {
+            display: none !important;
+        }
+
+        /* Hiệu ứng trượt nổi cho thanh công cụ chọn từ ở dưới cùng */
+        @keyframes slideUpFloating {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .animate-slide-up-floating {
+            animation: slideUpFloating 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Hiệu ứng trượt nổi cho các Bảng Modal */
+        @keyframes slideUpModal {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-slide-up-modal {
+            animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 font-sans pb-24 transition-colors duration-75">
+
+    <!-- Header chính -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm py-2 px-4 transition-colors duration-75">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 text-white p-1.5 rounded-lg shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base leading-tight">AI Dịch Song Ngữ</h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden md:block">Chạm chọn từ vựng, tra bối cảnh & lưu thư viện xuất Excel</p>
+                </div>
+            </div>
+
+            <!-- Thanh công cụ Header trực tiếp -->
+            <div class="flex items-center gap-2">
+                <button id="apiKeySettingsBtn" class="p-1.5 px-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-all border border-amber-200 dark:border-amber-800 flex items-center gap-1 text-xs font-semibold" title="Cài đặt API Key Gemini">
+                    <span>🔑</span>
+                    <span class="hidden sm:inline">API Key</span>
+                </button>
+
+                <button id="themeToggleBtn" class="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all border border-slate-300 dark:border-slate-600" title="Chuyển chế độ Tối / Sáng">
+                    <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden text-slate-600"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </button>
+
+                <button id="openLibraryBtn" class="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                    <span class="hidden xs:inline">Thư viện</span>
+                    <span id="vocabBadge" class="bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
+
+        <!-- Tabs chuyển chế độ nhập liệu -->
+        <div id="tabsHeader" class="bg-white dark:bg-slate-800 p-1.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 transition-colors duration-75">
+            <button class="tab-btn active flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800" data-tab="tab-text">
+                📝 Văn bản
+            </button>
+            <button class="tab-btn flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50" data-tab="tab-images">
+                🖼️ Nhiều Hình Ảnh
+            </button>
+            <button id="ytTabBtn" class="tab-btn flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50" data-tab="tab-youtube">
+                🎥 Video YouTube
+            </button>
+        </div>
+
+        <div id="mainGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            <!-- Cột Trái: Input -->
+            <div id="inputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] transition-all overflow-hidden">
+                
+                <div class="flex items-center justify-between mb-2 flex-shrink-0">
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Nhập liệu đầu vào:</span>
+                    <div class="flex items-center gap-2">
+                        <button id="clearAllInputBtn" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            <span>Xóa tất cả</span>
+                        </button>
+                        <button id="toggleCollapseInputBtn" class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                            <span>Thu gọn nhập liệu</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab 1: Text thường -->
+                <div id="tab-text" class="tab-content flex-1 flex flex-col min-h-0">
+                    <textarea id="inputText" class="w-full flex-1 p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none" placeholder="Dán đoạn văn tiếng Anh vào đây...&#10;&#10;In late 1946 or early 1947, three Bedouin&#10;teenagers were tending their goats and sheep near&#10;the ancient settlement of Qumran."></textarea>
+                </div>
+
+                <!-- Tab 2: Upload nhiều hình -->
+                <div id="tab-images" class="tab-content flex-1 flex-col hidden min-h-0">
+                    <div id="dropZoneImages" class="border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-xl p-4 text-center cursor-pointer mb-3 transition-colors flex-shrink-0">
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Bấm chọn ảnh, kéo thả hoặc nhấn <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 rounded text-[10px] font-mono">Ctrl + V</kbd> để dán ảnh</p>
+                        <input type="file" id="fileInputImages" multiple accept="image/*" class="hidden">
+                    </div>
+                    <div id="imageListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1 border border-slate-200 dark:border-slate-700 rounded-xl p-2 bg-slate-50/50 dark:bg-slate-900/50">
+                        <p id="emptyImageText" class="text-xs text-slate-400 dark:text-slate-500 text-center py-10">Chưa có hình ảnh nào được chọn</p>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Video YouTube -->
+                <div id="tab-youtube" class="tab-content flex-1 flex flex-col hidden space-y-3 min-h-0 overflow-y-auto pr-1">
+                    
+                    <!-- Khung phát Video YouTube (~1/4 diện tích) -->
+                    <div id="ytPlayerContainer" class="w-full h-44 sm:h-52 bg-black rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                        <p class="text-xs text-slate-500 text-center px-4">Bấm vào "Video YouTube" để mở bảng nhập Link & Transcript</p>
+                    </div>
+
+                    <!-- Thanh Điều khiển YouTube (Follow + Tốc độ) -->
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs gap-3 flex-wrap flex-shrink-0">
+                        <!-- Nút Follow Video -->
+                        <button id="toggleFollowBtn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+                            <span>🔄</span>
+                            <span id="followBtnText">Follow</span>
+                        </button>
+
+                        <!-- Thanh chọn tốc độ từ 1.00x - 2.00x -->
+                        <div class="flex items-center gap-2 flex-1 min-w-[140px]">
+                            <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Tốc độ: <b id="speedValText" class="text-blue-600 dark:text-blue-400 font-mono">1.00x</b></span>
+                            <input type="range" id="speedSlider" min="1.00" max="2.00" value="1.00" step="0.05" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- Nút Mở Lại Modal Nhập Link/Transcript -->
+                        <button id="reopenYtModalBtn" class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:underline px-2.5 py-1.5 rounded-lg font-medium">
+                            ✏️ Sửa Link/Transcript
+                        </button>
+                    </div>
+
+                    <!-- Tất cả công cụ điều khiển giao diện & dữ liệu xếp phía dưới Video -->
+                    <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2.5 text-xs flex-shrink-0">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <!-- Nút Ẩn/Hiện nghĩa tiếng Việt -->
+                            <button id="toggleViTextBtn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 px-2.5 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1">
+                                <span id="toggleViIcon">👁️</span> <span id="toggleViText">Nghĩa Việt</span>
+                            </button>
+
+                            <!-- Nút Chỉnh giao diện -->
+                            <button id="toggleSlidersMenuBtn" class="text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60" title="Chỉnh cỡ chữ & khoảng cách">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <span>Chỉnh giao diện</span>
+                            </button>
+
+                            <!-- Nút Dán Khôi Phục -->
+                            <button id="restoreDataBtn" class="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60" title="Dán dữ liệu đã chép để khôi phục bài dịch & sổ từ vựng">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
+                                <span>Dán khôi phục</span>
+                            </button>
+
+                            <!-- Nút Sao Chép Dữ Liệu -->
+                            <button id="copySpecialDataBtn" class="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60" title="Sao chép toàn bộ dữ liệu bài dịch & Sổ từ vựng">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                <span>Sao chép dữ liệu</span>
+                            </button>
+                        </div>
+
+                        <!-- Panel Sliders -->
+                        <div id="settingsSlidersPanel" class="bg-white dark:bg-slate-950/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 hidden animate-slide-up-modal">
+                            <div class="flex items-center justify-between gap-3 flex-wrap">
+                                <div class="flex items-center gap-2 flex-1 min-w-[120px]">
+                                    <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Chữ EN: <b id="fontEnVal" class="text-blue-600 dark:text-blue-400 font-mono">100%</b></span>
+                                    <input type="range" id="fontEnSlider" min="50" max="200" value="100" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                </div>
+                                <div class="flex items-center gap-2 flex-1 min-w-[120px]">
+                                    <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Chữ VI: <b id="fontViVal" class="text-emerald-600 dark:text-emerald-400 font-mono">100%</b></span>
+                                    <input type="range" id="fontViSlider" min="50" max="200" value="100" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-3 flex-wrap border-t border-slate-200/60 dark:border-slate-800 pt-2">
+                                <div class="flex items-center gap-2 flex-1 min-w-[130px]">
+                                    <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Cách câu: <b id="cardGapVal" class="text-purple-600 dark:text-purple-400 font-mono">12px</b></span>
+                                    <input type="range" id="cardGapSlider" min="1" max="50" value="12" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                                </div>
+                                <div class="flex items-center gap-2 flex-1 min-w-[130px]">
+                                    <span class="font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">Cách Anh-Việt: <b id="pairGapVal" class="text-amber-600 dark:text-amber-400 font-mono">4px</b></span>
+                                    <input type="range" id="pairGapSlider" min="0" max="30" value="4" step="1" class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút bấm dịch -->
+                <button id="translateBtn" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                    <span>Dịch & Nối câu</span>
+                </button>
+            </div>
+
+            <!-- Cột Phải: Kết quả Output -->
+            <div id="outputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] relative transition-all lg:col-span-1 overflow-hidden">
+                
+                <div class="flex items-center justify-between mb-2 flex-wrap gap-2 flex-shrink-0">
+                    <div class="flex items-center gap-2">
+                        <button id="expandInputBtn" class="hidden text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2.5 py-1 rounded-lg font-medium transition-all items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            <span>Hiện nhập liệu</span>
+                        </button>
+                        
+                        <h2 class="font-semibold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                            <span>Kết quả song ngữ</span>
+                            <span class="text-[11px] font-normal text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Chạm từ để chọn</span>
+                        </h2>
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                        <button id="copyResultBtn" class="text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 hidden" title="Sao chép dạng văn bản thuần">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="outputContainer" class="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-y-auto space-y-3">
+                    <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center px-4 space-y-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-40"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <p class="text-xs">Chưa có dữ liệu dịch. Hãy nhập nội dung và nhấn <b>Dịch & Nối câu</b>.</p>
+                        <button id="emptyRestoreBtn" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
+                            <span>Dán dữ liệu đã chép để khôi phục</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL API KEY GEMINI -->
+    <div id="apiKeyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-md p-5 space-y-4 animate-slide-up-modal my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🔑</span>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Cấu hình Gemini API Key</h3>
+                </div>
+                <button id="closeApiKeyModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Dán Google Gemini API Key cá nhân của bạn vào đây:
+                </p>
+                <input type="password" id="userApiKeyInput" class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-amber-500 font-mono" placeholder="AIzaSy...">
+                <p class="text-[11px] text-slate-500">
+                    Chưa có API Key? <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-500 underline font-semibold">Tạo key miễn phí tại Google AI Studio</a>
+                </p>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+                <button id="saveApiKeyBtn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition-all">
+                    <span>Lưu API Key</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NHẬP YOUTUBE LINK & TRANSCRIPT -->
+    <div id="ytInputModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-4 animate-slide-up-modal my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🎥</span>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Nhập Video YouTube & Transcript</h3>
+                </div>
+                <button id="closeYtInputModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">1. Link Video YouTube (không bắt buộc):</label>
+                <input type="text" id="ytModalUrlInput" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 font-mono" placeholder="Dán link Video YouTube (ví dụ: https://youtu.be/...)">
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">2. Transcript bài nói (không bắt buộc):</label>
+                <textarea id="ytModalTranscriptInput" class="w-full h-36 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none font-mono" placeholder="Dán transcript bài nói vào đây...&#10;&#10;00:16 that combined cultural&#10;00:19 values with unique tour&#10;00:22 digital technology&#10;00:24 features promotional aimed at"></textarea>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+                <button id="confirmYtModalBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all">
+                    <span>▶️ Tải Video & Dịch Transcript</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- THANH NỔI 3 NÚT CHỌN TỪ -->
+    <div id="selectionFloatingBar" class="fixed bottom-6 left-1/2 z-40 bg-slate-900/95 dark:bg-slate-950/95 text-white backdrop-blur-md rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-2 border border-slate-700/80 hidden transition-all animate-slide-up-floating max-w-[92vw]">
+        <div class="mr-1 hidden sm:block">
+            <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Đã chọn</p>
+            <p id="selectedPhrasePreview" class="text-xs font-semibold text-blue-300 max-w-[120px] truncate">word</p>
+        </div>
+
+        <button id="btnTranslateContext" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-medium px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm">
+            <span>🔍 Dịch context</span>
+        </button>
+
+        <button id="btnAddDictDirect" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-medium px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm">
+            <span>➕ Thêm vào từ điển</span>
+        </button>
+
+        <button id="btnCancelSelection" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white p-2 rounded-xl text-xs transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+
+    <!-- MODAL XEM CHI TIẾT DỊCH CONTEXT -->
+    <div id="contextModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 sm:p-6 space-y-4 animate-slide-up-modal my-auto max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-3 flex-shrink-0">
+                <div class="pr-2">
+                    <span id="modalTypeBadge" class="bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Word</span>
+                    <h3 id="modalWordTitle" class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mt-1 break-words">word</h3>
+                </div>
+                <button id="closeContextModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-sm overflow-y-auto flex-1 pr-1">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Ý nghĩa theo bối cảnh</p>
+                    <p id="modalMeaningText" class="text-sm sm:text-base font-semibold text-blue-600 dark:text-blue-400 mt-0.5 break-words">...</p>
+                </div>
+
+                <div id="modalCollocationBox" class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Cấu trúc / Collocation đầy đủ</p>
+                    <p id="modalCollocationText" class="text-xs text-slate-700 dark:text-slate-300 font-mono mt-1 break-words">...</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Câu gốc</p>
+                    <p id="modalSentenceContext" class="text-xs text-slate-600 dark:text-slate-300 italic bg-amber-50/60 dark:bg-amber-950/40 p-2.5 rounded-lg border border-amber-200/60 dark:border-amber-800/60 mt-1 break-words">...</p>
+                </div>
+            </div>
+
+            <div class="pt-2 flex gap-2 flex-shrink-0">
+                <button id="modalSaveVocabBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all">
+                    <span>➕ Lưu vào thư viện</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL THƯ VIỆN TỪ VỰNG -->
+    <div id="libraryModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-2xl h-[85vh] flex flex-col p-4 sm:p-6 animate-slide-up-modal my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3 flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">Thư viện từ vựng đã lưu</h3>
+                    <span id="libCountBadge" class="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-2 py-0.5 rounded-full">0 từ</span>
+                </div>
+                <button id="closeLibraryModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <!-- Toolbar Tìm kiếm & Xuất Excel -->
+            <div class="py-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
+                <input type="text" id="libSearchInput" placeholder="Tìm kiếm từ vựng..." class="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-3 py-2 outline-none focus:border-blue-500 w-full sm:w-64">
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+                    <button id="exportExcelBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                        <span>Xuất File Excel</span>
+                    </button>
+
+                    <button id="clearAllVocabBtn" class="text-xs text-red-500 hover:text-red-700 px-2 py-1">Xóa tất cả</button>
+                </div>
+            </div>
+
+            <!-- Danh sách từ vựng -->
+            <div id="vocabListContainer" class="flex-1 overflow-y-auto py-3 space-y-2 pr-1">
+                <p class="text-xs text-slate-400 text-center py-12">Thư viện chưa có từ vựng nào.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DÁN KHÔI PHỤC BÀI DỊCH & THƯ VIỆN -->
+    <div id="restoreModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-3 animate-slide-up-modal my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Dán dữ liệu khôi phục bài dịch & từ vựng</h3>
+                <button id="closeRestoreModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu bạn đã chọn "Sao chép dữ liệu" trước đó vào đây để khôi phục lại ngay bài dịch & sổ từ vựng:</p>
+            <textarea id="restoreInputArea" class="w-full h-32 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-mono" placeholder="Dán mã dữ liệu vào đây..."></textarea>
+            <div class="flex gap-2 pt-1">
+                <button id="confirmRestoreBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                    <span>Khôi phục ngay</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        Thông báo
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const getEl = (id) => document.getElementById(id);
+
+            const apiKeyModal = getEl('apiKeyModal');
+            const apiKeySettingsBtn = getEl('apiKeySettingsBtn');
+            const closeApiKeyModal = getEl('closeApiKeyModal');
+            const userApiKeyInput = getEl('userApiKeyInput');
+            const saveApiKeyBtn = getEl('saveApiKeyBtn');
+
+            const themeToggleBtn = getEl('themeToggleBtn');
+            const themeIconSun = getEl('themeIconSun');
+            const themeIconMoon = getEl('themeIconMoon');
+
+            const openLibraryBtn = getEl('openLibraryBtn');
+            const vocabBadge = getEl('vocabBadge');
+            const libCountBadge = getEl('libCountBadge');
+            const libraryModal = getEl('libraryModal');
+            const closeLibraryModal = getEl('closeLibraryModal');
+            const libSearchInput = getEl('libSearchInput');
+            const exportExcelBtn = getEl('exportExcelBtn');
+            const clearAllVocabBtn = getEl('clearAllVocabBtn');
+            const vocabListContainer = getEl('vocabListContainer');
+
+            const translateBtn = getEl('translateBtn');
+            const inputText = getEl('inputText');
+            const outputContainer = getEl('outputContainer');
+            const emptyState = getEl('emptyState');
+            const toast = getEl('toast');
+            const copyResultBtn = getEl('copyResultBtn');
+            const copySpecialDataBtn = getEl('copySpecialDataBtn');
+            const restoreDataBtn = getEl('restoreDataBtn');
+            const emptyRestoreBtn = getEl('emptyRestoreBtn');
+
+            const mainGrid = getEl('mainGrid');
+            const inputColCard = getEl('inputColCard');
+            const outputColCard = getEl('outputColCard');
+            const toggleCollapseInputBtn = getEl('toggleCollapseInputBtn');
+            const expandInputBtn = getEl('expandInputBtn');
+            const clearAllInputBtn = getEl('clearAllInputBtn');
+
+            const toggleSlidersMenuBtn = getEl('toggleSlidersMenuBtn');
+            const settingsSlidersPanel = getEl('settingsSlidersPanel');
+            const fontEnSlider = getEl('fontEnSlider');
+            const fontViSlider = getEl('fontViSlider');
+            const fontEnVal = getEl('fontEnVal');
+            const fontViVal = getEl('fontViVal');
+            const toggleViTextBtn = getEl('toggleViTextBtn');
+            const toggleViIcon = getEl('toggleViIcon');
+            const toggleViText = getEl('toggleViText');
+            const cardGapSlider = getEl('cardGapSlider');
+            const cardGapVal = getEl('cardGapVal');
+            const pairGapSlider = getEl('pairGapSlider');
+            const pairGapVal = getEl('pairGapVal');
+
+            const ytTabBtn = getEl('ytTabBtn');
+            const reopenYtModalBtn = getEl('reopenYtModalBtn');
+            const ytInputModal = getEl('ytInputModal');
+            const closeYtInputModal = getEl('closeYtInputModal');
+            const confirmYtModalBtn = getEl('confirmYtModalBtn');
+            const ytModalUrlInput = getEl('ytModalUrlInput');
+            const ytModalTranscriptInput = getEl('ytModalTranscriptInput');
+            const ytPlayerContainer = getEl('ytPlayerContainer');
+            const toggleFollowBtn = getEl('toggleFollowBtn');
+            const followBtnText = getEl('followBtnText');
+            const speedSlider = getEl('speedSlider');
+            const speedValText = getEl('speedValText');
+
+            const dropZoneImages = getEl('dropZoneImages');
+            const fileInputImages = getEl('fileInputImages');
+            const imageListContainer = getEl('imageListContainer');
+            const emptyImageText = getEl('emptyImageText');
+
+            const selectionFloatingBar = getEl('selectionFloatingBar');
+            const selectedPhrasePreview = getEl('selectedPhrasePreview');
+            const btnTranslateContext = getEl('btnTranslateContext');
+            const btnAddDictDirect = getEl('btnAddDictDirect');
+            const btnCancelSelection = getEl('btnCancelSelection');
+
+            const contextModal = getEl('contextModal');
+            const closeContextModal = getEl('closeContextModal');
+            const modalTypeBadge = getEl('modalTypeBadge');
+            const modalWordTitle = getEl('modalWordTitle');
+            const modalMeaningText = getEl('modalMeaningText');
+            const modalCollocationText = getEl('modalCollocationText');
+            const modalSentenceContext = getEl('modalSentenceContext');
+            const modalSaveVocabBtn = getEl('modalSaveVocabBtn');
+
+            const restoreModal = getEl('restoreModal');
+            const closeRestoreModal = getEl('closeRestoreModal');
+            const restoreInputArea = getEl('restoreInputArea');
+            const confirmRestoreBtn = getEl('confirmRestoreBtn');
+
+            // --- THEME TỐI / SÁNG ---
+            function applyTheme(isDark) {
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    if (themeIconSun) themeIconSun.classList.remove('hidden');
+                    if (themeIconMoon) themeIconMoon.classList.add('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    if (themeIconSun) themeIconSun.classList.add('hidden');
+                    if (themeIconMoon) themeIconMoon.classList.remove('hidden');
+                }
+            }
+
+            const savedTheme = localStorage.getItem('theme');
+            let isDarkMode = savedTheme ? savedTheme === 'dark' : true; // Mặc định DARK MODE
+            applyTheme(isDarkMode);
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    isDarkMode = !isDarkMode;
+                    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                    applyTheme(isDarkMode);
+                });
+            }
+
+            function getSavedApiKey() {
+                return localStorage.getItem('gemini_api_key') || "";
+            }
+
+            async function callGeminiApi(payload, retries = 5) {
+                const currentApiKey = getSavedApiKey();
+                
+                if (!currentApiKey) {
+                    openApiKeyModal();
+                    throw new Error("Vui lòng nhập API Key Gemini của bạn để thực hiện dịch!");
+                }
+
+                // Chế độ mô hình Gemini 2.0 Flash
+                const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`;
+                const delays = [1000, 2000, 4000, 8000, 16000];
+
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(API_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const err = await response.json().catch(() => ({}));
+                            if (response.status === 400 || response.status === 403) {
+                                openApiKeyModal();
+                                throw new Error(`API Key không hợp lệ hoặc hết hạn (${response.status})!`);
+                            }
+                            throw new Error(`Lỗi Google API (${response.status}): ${err.error?.message || 'HTTP ' + response.status}`);
+                        }
+
+                        return await response.json();
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(r => setTimeout(r, delays[i]));
+                    }
+                }
+            }
+
+            function openApiKeyModal() {
+                if (userApiKeyInput) userApiKeyInput.value = getSavedApiKey();
+                if (apiKeyModal) apiKeyModal.classList.remove('hidden');
+            }
+
+            if (apiKeySettingsBtn) apiKeySettingsBtn.addEventListener('click', openApiKeyModal);
+            if (closeApiKeyModal) closeApiKeyModal.addEventListener('click', () => apiKeyModal.classList.add('hidden'));
+
+            if (saveApiKeyBtn) {
+                saveApiKeyBtn.addEventListener('click', () => {
+                    const val = userApiKeyInput ? userApiKeyInput.value.trim() : '';
+                    if (!val) return showToast('Vui lòng nhập API Key!', true);
+                    localStorage.setItem('gemini_api_key', val);
+                    apiKeyModal.classList.add('hidden');
+                    showToast('Đã lưu API Key thành công!');
+                });
+            }
+
+            function extractYoutubeId(url) {
+                if (!url) return null;
+                const cleanUrl = url.trim();
+                const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+                const match = cleanUrl.match(regExp);
+                return (match && match[1]) ? match[1] : null;
+            }
+
+            function loadYoutubeVideo(url) {
+                const videoId = extractYoutubeId(url);
+                if (!videoId) {
+                    showToast('Link YouTube không hợp lệ!', true);
+                    return false;
+                }
+
+                if (ytPlayerContainer) {
+                    ytPlayerContainer.innerHTML = `<div id="ytIframeContainer" class="w-full h-full"></div>`;
+                }
+
+                try {
+                    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+                        ytPlayer.destroy();
+                    }
+                } catch(e){}
+
+                if (window.YT && window.YT.Player) {
+                    try {
+                        ytPlayer = new YT.Player('ytIframeContainer', {
+                            height: '100%',
+                            width: '100%',
+                            videoId: videoId,
+                            host: 'https://www.youtube-nocookie.com',
+                            playerVars: {
+                                'playsinline': 1,
+                                'enablejsapi': 1,
+                                'origin': window.location.origin
+                            },
+                            events: {
+                                'onReady': (event) => {
+                                    if (currentPlaybackSpeed) {
+                                        try { event.target.setPlaybackRate(parseFloat(currentPlaybackSpeed)); } catch(e){}
+                                    }
+                                }
+                            }
+                        });
+                    } catch(e) {
+                        if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+                    }
+                } else {
+                    if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+                }
+
+                showToast('Đã tải Video YouTube thành công!');
+                return true;
+            }
+
+            let imageFiles = [];
+            let selectedWordTokens = [];
+            let currentContextData = null;
+            let currentSentencePairs = [];
+            let vocabLibrary = JSON.parse(localStorage.getItem('vocab_library') || '[]');
+            let isViHidden = false;
+
+            let ytPlayer = null;
+            let isFollowEnabled = false;
+            let followInterval = null;
+            let currentActiveSentenceIndex = -1;
+            let currentPlaybackSpeed = 1.00;
+
+            function openYtModal() {
+                if (ytModalUrlInput) ytModalUrlInput.value = ytModalUrlInput.value || '';
+                if (ytModalTranscriptInput) ytModalTranscriptInput.value = ytModalTranscriptInput.value || '';
+                if (ytInputModal) ytInputModal.classList.remove('hidden');
+            }
+
+            if (ytTabBtn) ytTabBtn.addEventListener('click', () => openYtModal());
+            if (reopenYtModalBtn) reopenYtModalBtn.addEventListener('click', () => openYtModal());
+            if (closeYtInputModal) closeYtInputModal.addEventListener('click', () => ytInputModal.classList.add('hidden'));
+
+            if (confirmYtModalBtn) {
+                confirmYtModalBtn.addEventListener('click', async () => {
+                    const url = ytModalUrlInput ? ytModalUrlInput.value.trim() : '';
+                    const transcript = ytModalTranscriptInput ? ytModalTranscriptInput.value.trim() : '';
+
+                    if (!url && !transcript) {
+                        return showToast('Vui lòng nhập Link Video hoặc Transcript!', true);
+                    }
+
+                    if (ytInputModal) ytInputModal.classList.add('hidden');
+
+                    if (url) {
+                        loadYoutubeVideo(url);
+                    }
+
+                    if (transcript) {
+                        await executeTranslation('tab-youtube', transcript);
+                    } else {
+                        showToast('Đã tải video YouTube.');
+                    }
+                });
+            }
+
+            if (toggleSlidersMenuBtn && settingsSlidersPanel) {
+                toggleSlidersMenuBtn.addEventListener('click', () => {
+                    settingsSlidersPanel.classList.toggle('hidden');
+                });
+            }
+
+            if (fontEnSlider && fontEnVal) {
+                fontEnSlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    fontEnVal.textContent = val + '%';
+                    outputContainer.style.setProperty('--font-en-scale', val / 100);
+                });
+            }
+
+            if (fontViSlider && fontViVal) {
+                fontViSlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    fontViVal.textContent = val + '%';
+                    outputContainer.style.setProperty('--font-vi-scale', val / 100);
+                });
+            }
+
+            if (toggleViTextBtn) {
+                toggleViTextBtn.addEventListener('click', () => {
+                    isViHidden = !isViHidden;
+                    if (isViHidden) {
+                        outputContainer.classList.add('hide-vi');
+                        if (toggleViIcon) toggleViIcon.textContent = '🙈';
+                        if (toggleViText) toggleViText.textContent = 'Ẩn nghĩa VI';
+                        toggleViTextBtn.classList.remove('bg-slate-200', 'dark:bg-slate-700');
+                        toggleViTextBtn.classList.add('bg-amber-100', 'dark:bg-amber-950/80', 'text-amber-700', 'dark:text-amber-300');
+                    } else {
+                        outputContainer.classList.remove('hide-vi');
+                        if (toggleViIcon) toggleViIcon.textContent = '👁️';
+                        if (toggleViText) toggleViText.textContent = 'Nghĩa Việt';
+                        toggleViTextBtn.classList.add('bg-slate-200', 'dark:bg-slate-700');
+                        toggleViTextBtn.classList.remove('bg-amber-100', 'dark:bg-amber-950/80', 'text-amber-700', 'dark:text-amber-300');
+                    }
+                });
+            }
+
+            if (cardGapSlider && cardGapVal) {
+                cardGapSlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    cardGapVal.textContent = val + 'px';
+                    outputContainer.style.setProperty('--card-gap', val + 'px');
+                });
+            }
+
+            if (pairGapSlider && pairGapVal) {
+                pairGapSlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    pairGapVal.textContent = val + 'px';
+                    outputContainer.style.setProperty('--pair-gap', val + 'px');
+                });
+            }
+
+            if (speedSlider && speedValText) {
+                speedSlider.addEventListener('input', (e) => {
+                    const speed = parseFloat(e.target.value);
+                    currentPlaybackSpeed = speed;
+                    speedValText.textContent = speed.toFixed(2) + 'x';
+                    if (ytPlayer && typeof ytPlayer.setPlaybackRate === 'function') {
+                        try { ytPlayer.setPlaybackRate(speed); } catch(e){}
+                    }
+                });
+            }
+
+            if (toggleFollowBtn) {
+                toggleFollowBtn.addEventListener('click', () => {
+                    isFollowEnabled = !isFollowEnabled;
+                    updateFollowBtnUI();
+                });
+            }
+
+            function updateFollowBtnUI() {
+                if (isFollowEnabled) {
+                    toggleFollowBtn.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200');
+                    toggleFollowBtn.classList.add('bg-cyan-600', 'text-white', 'shadow-md');
+                    startFollowLoop();
+                    showToast('Đã BẬT Follow Video!');
+                } else {
+                    toggleFollowBtn.classList.add('bg-slate-200', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200');
+                    toggleFollowBtn.classList.remove('bg-cyan-600', 'text-white', 'shadow-md');
+                    stopFollowLoop();
+                    clearActiveHighlight();
+                    showToast('Đã TẮT Follow Video.');
+                }
+            }
+
+            function startFollowLoop() {
+                if (followInterval) clearInterval(followInterval);
+                followInterval = setInterval(() => {
+                    if (!isFollowEnabled || !ytPlayer) return;
+                    try {
+                        let currentTime = 0;
+                        if (typeof ytPlayer.getCurrentTime === 'function') {
+                            currentTime = ytPlayer.getCurrentTime();
+                        } else {
+                            return;
+                        }
+                        if (!currentSentencePairs || currentSentencePairs.length === 0) return;
+
+                        let activeIdx = -1;
+                        for (let i = 0; i < currentSentencePairs.length; i++) {
+                            const pair = currentSentencePairs[i];
+                            const sec = pair.seconds !== undefined ? pair.seconds : parseTimeToSeconds(pair.time);
+                            if (sec <= currentTime + 0.3) {
+                                activeIdx = i;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (activeIdx !== -1 && activeIdx !== currentActiveSentenceIndex) {
+                            highlightActiveSentence(activeIdx);
+                        }
+                    } catch(e){}
+                }, 250);
+            }
+
+            function stopFollowLoop() {
+                if (followInterval) {
+                    clearInterval(followInterval);
+                    followInterval = null;
+                }
+            }
+
+            function highlightActiveSentence(index) {
+                currentActiveSentenceIndex = index;
+                const cards = outputContainer.querySelectorAll('.sentence-card');
+                cards.forEach((card, idx) => {
+                    if (idx === index) {
+                        card.classList.add('active-transcript');
+                        if (isFollowEnabled) {
+                            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    } else {
+                        card.classList.remove('active-transcript');
+                    }
+                });
+            }
+
+            function clearActiveHighlight() {
+                currentActiveSentenceIndex = -1;
+                const cards = outputContainer.querySelectorAll('.sentence-card');
+                cards.forEach(card => card.classList.remove('active-transcript'));
+            }
+
+            function parseTimeToSeconds(timeStr) {
+                if (!timeStr) return 0;
+                const clean = timeStr.toString().trim().replace(/[^\d:]/g, '');
+                const parts = clean.split(':').map(Number);
+                if (parts.length === 1 && !isNaN(parts[0])) {
+                    return parts[0];
+                } else if (parts.length === 2) {
+                    return (parts[0] * 60) + parts[1];
+                } else if (parts.length === 3) {
+                    return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+                }
+                return 0;
+            }
+
+            if (toggleCollapseInputBtn) {
+                toggleCollapseInputBtn.addEventListener('click', () => {
+                    inputColCard.classList.add('hidden');
+                    outputColCard.classList.remove('lg:col-span-1');
+                    outputColCard.classList.add('lg:col-span-2');
+                    expandInputBtn.classList.remove('hidden');
+                    expandInputBtn.classList.add('flex');
+                    showToast('Đã thu gọn nhập liệu để tăng không gian đọc.');
+                });
+            }
+
+            if (expandInputBtn) {
+                expandInputBtn.addEventListener('click', () => {
+                    inputColCard.classList.remove('hidden');
+                    outputColCard.classList.remove('lg:col-span-2');
+                    outputColCard.classList.add('lg:col-span-1');
+                    expandInputBtn.classList.add('hidden');
+                    expandInputBtn.classList.remove('flex');
+                });
+            }
+
+            if (clearAllInputBtn) {
+                clearAllInputBtn.addEventListener('click', () => {
+                    if (inputText) inputText.value = '';
+                    imageFiles = [];
+                    renderImageList();
+                    if (ytModalUrlInput) ytModalUrlInput.value = '';
+                    if (ytModalTranscriptInput) ytModalTranscriptInput.value = '';
+                    if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<p class="text-xs text-slate-500 text-center px-4">Bấm vào "Video YouTube" để mở bảng nhập Link & Transcript</p>`;
+                    try { if (ytPlayer) ytPlayer.destroy(); } catch(e){}
+                    ytPlayer = null;
+                    showToast('Đã làm sạch toàn bộ dữ liệu nhập.');
+                });
+            }
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.remove('text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
+                        b.classList.add('text-slate-600', 'dark:text-slate-400');
+                    });
+                    btn.classList.add('active');
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-400');
+                    btn.classList.add('text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
+
+                    const targetTab = btn.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                    const targetEl = getEl(targetTab);
+                    if (targetEl) targetEl.classList.remove('hidden');
+
+                    if (targetTab === 'tab-youtube') {
+                        translateBtn.classList.add('hidden');
+                    } else {
+                        translateBtn.classList.remove('hidden');
+                    }
+                });
+            });
+
+            if (dropZoneImages && fileInputImages) {
+                dropZoneImages.addEventListener('click', () => fileInputImages.click());
+                fileInputImages.addEventListener('change', (e) => handleImageFiles(e.target.files));
+
+                dropZoneImages.addEventListener('dragover', (e) => { e.preventDefault(); dropZoneImages.classList.add('bg-blue-100/50'); });
+                dropZoneImages.addEventListener('dragleave', () => dropZoneImages.classList.remove('bg-blue-100/50'));
+                dropZoneImages.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZoneImages.classList.remove('bg-blue-100/50');
+                    if (e.dataTransfer.files) handleImageFiles(e.dataTransfer.files);
+                });
+            }
+
+            document.addEventListener('paste', (e) => {
+                const activeTabId = document.querySelector('.tab-content:not(.hidden)')?.id;
+                if (activeTabId !== 'tab-images') return;
+
+                const items = e.clipboardData?.items;
+                if (!items) return;
+                const files = [];
+                for (let item of items) {
+                    if (item.type.indexOf('image') !== -1) {
+                        files.push(item.getAsFile());
+                    }
+                }
+                if (files.length > 0) {
+                    handleImageFiles(files);
+                    showToast(`Đã dán ${files.length} ảnh!`);
+                }
+            });
+
+            function handleImageFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (!file.type.startsWith('image/')) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imageFiles.push({
+                            id: Date.now() + Math.random(),
+                            dataUrl: e.target.result,
+                            base64: e.target.result.split(',')[1],
+                            mimeType: file.type
+                        });
+                        renderImageList();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function renderImageList() {
+                if (!imageListContainer) return;
+                imageListContainer.innerHTML = '';
+                if (imageFiles.length === 0) {
+                    if (emptyImageText) imageListContainer.appendChild(emptyImageText);
+                    return;
+                }
+
+                imageFiles.forEach((img, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm';
+                    item.innerHTML = `
+                        <span class="text-xs font-bold text-slate-400 w-4">${idx + 1}.</span>
+                        <img src="${img.dataUrl}" class="w-10 h-10 object-cover rounded border border-slate-200 dark:border-slate-700">
+                        <span class="text-xs text-slate-500 dark:text-slate-400 truncate flex-1">Ảnh ${idx + 1}</span>
+                        <button onclick="moveImage(${idx}, -1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400" ${idx === 0 ? 'disabled class="opacity-30"' : ''}>▲</button>
+                        <button onclick="moveImage(${idx}, 1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400" ${idx === imageFiles.length - 1 ? 'disabled class="opacity-30"' : ''}>▼</button>
+                        <button onclick="removeImage(${idx})" class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded">✕</button>
+                    `;
+                    imageListContainer.appendChild(item);
+                });
+            }
+
+            window.moveImage = function(index, direction) {
+                const target = index + direction;
+                if (target < 0 || target >= imageFiles.length) return;
+                const temp = imageFiles[index];
+                imageFiles[index] = imageFiles[target];
+                imageFiles[target] = temp;
+                renderImageList();
+            };
+
+            window.removeImage = function(index) {
+                imageFiles.splice(index, 1);
+                renderImageList();
+            };
+
+            async function executeTranslation(activeTabId, customText = '') {
+                clearSelection();
+
+                let payloadParts = [];
+                let systemPrompt = "";
+                let responseSchema = null;
+
+                if (activeTabId === 'tab-text') {
+                    const text = inputText ? inputText.value.trim() : '';
+                    if (!text) return showToast('Vui lòng nhập văn bản!', true);
+                    payloadParts.push({ text: text });
+
+                    systemPrompt = `Bạn là chuyên gia dịch thuật Anh - Việt cao cấp.
+Nhiệm vụ:
+1. Nhận văn bản tiếng Anh đầu vào.
+2. Nối các câu bị đứt gãy do xuống dòng thành các CÂU HOÀN CHỈNH.
+3. Bắt buộc tách kết quả theo TỪNG CÂU HOÀN CHỈNH.
+4. Trả về định dạng JSON Array chứa các cặp:
+   - "en": Câu tiếng Anh nguyên bản (đã nối gãy).
+   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
+
+                    responseSchema = {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                en: { type: "STRING" },
+                                vi: { type: "STRING" }
+                            },
+                            required: ["en", "vi"]
+                        }
+                    };
+
+                } else if (activeTabId === 'tab-images') {
+                    if (imageFiles.length === 0) return showToast('Vui lòng tải lên hoặc dán ít nhất 1 ảnh!', true);
+                    payloadParts.push({ text: "Hãy đọc toàn bộ chữ tiếng Anh trong các bức ảnh theo đúng thứ tự, nối các câu bị gãy và dịch sang tiếng Việt:" });
+                    imageFiles.forEach(img => {
+                        payloadParts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
+                    });
+
+                    systemPrompt = `Bạn là chuyên gia dịch thuật Anh - Việt cao cấp.
+Nhiệm vụ:
+1. Nhận hình ảnh tiếng Anh đầu vào.
+2. Nối các câu bị đứt gãy thành các CÂU HOÀN CHỈNH.
+3. Trả về định dạng JSON Array chứa: "en", "vi".`;
+
+                    responseSchema = {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                en: { type: "STRING" },
+                                vi: { type: "STRING" }
+                            },
+                            required: ["en", "vi"]
+                        }
+                    };
+
+                } else if (activeTabId === 'tab-youtube') {
+                    const transcriptText = customText || (ytModalTranscriptInput ? ytModalTranscriptInput.value.trim() : '');
+                    if (!transcriptText) return showToast('Vui lòng dán transcript bài nói YouTube!', true);
+
+                    payloadParts.push({ text: transcriptText });
+
+                    systemPrompt = `Bạn là chuyên gia dịch thuật và xử lý transcript YouTube Anh - Việt.
+Nhiệm vụ:
+1. Nhận transcript tiếng Anh có kèm mốc thời gian (ví dụ 00:16, 6:26...).
+2. Tách/gộp thành từng câu thoại ngắn hợp lý kèm mốc thời gian tương ứng.
+3. Trả về định dạng JSON Array chứa các phần tử:
+   - "time": Mốc thời gian nguyên bản (ví dụ "00:16", "06:26").
+   - "seconds": Thời gian tính bằng giây quy đổi ra số (ví dụ 16, 386).
+   - "en": Câu/Cụm từ tiếng Anh.
+   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
+
+                    responseSchema = {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                time: { type: "STRING" },
+                                seconds: { type: "NUMBER" },
+                                en: { type: "STRING" },
+                                vi: { type: "STRING" }
+                            },
+                            required: ["time", "seconds", "en", "vi"]
+                        }
+                    };
+                }
+
+                const payload = {
+                    contents: [{ parts: payloadParts }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: responseSchema
+                    }
+                };
+
+                const origText = translateBtn ? translateBtn.innerHTML : '';
+                if (translateBtn) {
+                    translateBtn.innerHTML = `<div class="loader"></div> <span>Đang phân tích & dịch...</span>`;
+                    translateBtn.disabled = true;
+                }
+                if (emptyState) emptyState.style.display = 'none';
+                if (outputContainer) outputContainer.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 py-12"><div class="loader mb-2"></div><p class="text-xs">AI đang đọc nối câu và dịch ngữ cảnh...</p></div>`;
+
+                try {
+                    const data = await callGeminiApi(payload);
+                    const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!rawJson) throw new Error("Không nhận được dữ liệu từ AI");
+                    currentSentencePairs = JSON.parse(rawJson);
+                    
+                    currentSentencePairs.forEach(pair => {
+                        if (pair.time && (pair.seconds === undefined || pair.seconds === null)) {
+                            pair.seconds = parseTimeToSeconds(pair.time);
+                        }
+                    });
+
+                    renderResults(currentSentencePairs);
+
+                    if (activeTabId === 'tab-youtube') {
+                        isFollowEnabled = true;
+                        updateFollowBtnUI();
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    if (outputContainer) outputContainer.innerHTML = `<div class="p-4 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-xl text-xs border border-red-200 dark:border-red-900"><p class="font-bold mb-1">Lỗi:</p><p>${err.message}</p></div>`;
+                } finally {
+                    if (translateBtn) {
+                        translateBtn.innerHTML = origText;
+                        translateBtn.disabled = false;
+                    }
+                }
+            }
+
+            if (translateBtn) {
+                translateBtn.addEventListener('click', () => {
+                    const activeTabContent = document.querySelector('.tab-content:not(.hidden)');
+                    const activeTabId = activeTabContent ? activeTabContent.id : 'tab-text';
+                    executeTranslation(activeTabId);
+                });
+            }
+
+            function renderResults(sentencePairs) {
+                if (!outputContainer) return;
+                outputContainer.innerHTML = '';
+                currentSentencePairs = sentencePairs;
+
+                if (!sentencePairs || sentencePairs.length === 0) {
+                    if (emptyState) outputContainer.appendChild(emptyState);
+                    if (copyResultBtn) copyResultBtn.classList.add('hidden');
+                    if (copySpecialDataBtn) copySpecialDataBtn.classList.add('hidden');
+                    return;
+                }
+
+                sentencePairs.forEach((pair, sentenceIndex) => {
+                    const card = document.createElement('div');
+                    card.className = 'sentence-card p-2.5 rounded-xl border shadow-sm cursor-pointer select-none';
+
+                    const enContainer = document.createElement('div');
+                    enContainer.className = 'en-container font-medium text-slate-800 dark:text-slate-100 leading-relaxed tracking-normal flex flex-wrap items-center';
+
+                    if (pair.time) {
+                        const timeBadge = document.createElement('span');
+                        timeBadge.className = 'text-[11px] font-mono font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-900/60 border border-cyan-200 dark:border-cyan-800 px-1.5 py-0.5 rounded-md mr-2 flex-shrink-0 cursor-pointer hover:bg-cyan-200 dark:hover:bg-cyan-800 transition-colors';
+                        timeBadge.textContent = pair.time;
+                        enContainer.appendChild(timeBadge);
+                    }
+
+                    const words = pair.en.split(/(\s+)/);
+                    let wordIndexCount = 0;
+
+                    words.forEach(token => {
+                        if (/^\s+$/.test(token)) {
+                            enContainer.appendChild(document.createTextNode(token));
+                        } else {
+                            const wordSpan = document.createElement('span');
+                            wordSpan.className = 'word-token';
+                            wordSpan.textContent = token;
+                            wordSpan.dataset.sentenceIndex = sentenceIndex;
+                            wordSpan.dataset.tokenIndex = wordIndexCount++;
+                            wordSpan.dataset.wordText = token.replace(/^[^\w]+|[^\w]+$/g, '');
+                            wordSpan.dataset.fullSentence = pair.en;
+
+                            wordSpan.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                toggleWordSelection(wordSpan);
+                            });
+
+                            enContainer.appendChild(wordSpan);
+                        }
+                    });
+
+                    const viText = document.createElement('p');
+                    viText.className = 'vi-text text-slate-500 dark:text-slate-400 opacity-80 leading-normal border-t border-slate-200 dark:border-slate-700/60 pt-1.5 mt-1';
+                    viText.textContent = pair.vi;
+
+                    card.appendChild(enContainer);
+                    card.appendChild(viText);
+
+                    card.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('word-token')) return;
+
+                        const sec = pair.seconds !== undefined ? pair.seconds : parseTimeToSeconds(pair.time);
+                        if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+                            try {
+                                ytPlayer.seekTo(sec, true);
+                                if (typeof ytPlayer.playVideo === 'function') {
+                                    ytPlayer.playVideo();
+                                }
+                                highlightActiveSentence(sentenceIndex);
+                            } catch(err){}
+                        }
+                    });
+
+                    outputContainer.appendChild(card);
+                });
+
+                if (copyResultBtn) copyResultBtn.classList.remove('hidden');
+                if (copySpecialDataBtn) {
+                    copySpecialDataBtn.classList.remove('hidden');
+                    copySpecialDataBtn.classList.add('flex');
+                }
+            }
+
+            function toggleWordSelection(span) {
+                const isSelected = span.classList.contains('selected');
+
+                if (isSelected) {
+                    span.classList.remove('selected');
+                    selectedWordTokens = selectedWordTokens.filter(item => item.element !== span);
+                } else {
+                    span.classList.add('selected');
+                    selectedWordTokens.push({
+                        element: span,
+                        sentenceIndex: parseInt(span.dataset.sentenceIndex),
+                        tokenIndex: parseInt(span.dataset.tokenIndex),
+                        cleanText: span.dataset.wordText,
+                        rawText: span.textContent,
+                        fullSentence: span.dataset.fullSentence
+                    });
+                }
+
+                updateFloatingBar();
+            }
+
+            function clearSelection() {
+                selectedWordTokens.forEach(item => item.element.classList.remove('selected'));
+                selectedWordTokens = [];
+                updateFloatingBar();
+            }
+
+            function updateFloatingBar() {
+                if (!selectionFloatingBar) return;
+                if (selectedWordTokens.length === 0) {
+                    selectionFloatingBar.classList.add('hidden');
+                    return;
+                }
+
+                selectedWordTokens.sort((a, b) => {
+                    if (a.sentenceIndex !== b.sentenceIndex) return a.sentenceIndex - b.sentenceIndex;
+                    return a.tokenIndex - b.tokenIndex;
+                });
+
+                const phrase = selectedWordTokens.map(t => t.rawText).join(' ').trim();
+                if (selectedPhrasePreview) selectedPhrasePreview.textContent = phrase || 'Từ đã chọn';
+                selectionFloatingBar.classList.remove('hidden');
+            }
+
+            if (btnCancelSelection) btnCancelSelection.addEventListener('click', clearSelection);
+
+            if (btnTranslateContext) {
+                btnTranslateContext.addEventListener('click', async () => {
+                    if (selectedWordTokens.length === 0) return;
+                    const selectedPhrase = selectedWordTokens.map(t => t.cleanText).filter(Boolean).join(' ');
+                    const fullSentence = selectedWordTokens[0].fullSentence;
+
+                    openContextModalLoading(selectedPhrase, fullSentence);
+                    await fetchContextAnalysis(selectedPhrase, fullSentence);
+                });
+            }
+
+            function openContextModalLoading(phrase, sentence) {
+                if (modalTypeBadge) modalTypeBadge.textContent = "AI Analysing...";
+                if (modalWordTitle) modalWordTitle.textContent = phrase;
+                if (modalMeaningText) modalMeaningText.innerHTML = `<span class="loader"></span> Đang phân tích bối cảnh...`;
+                if (modalCollocationText) modalCollocationText.textContent = "...";
+                if (modalSentenceContext) modalSentenceContext.textContent = `"${sentence}"`;
+                if (modalSaveVocabBtn) modalSaveVocabBtn.disabled = true;
+                if (contextModal) contextModal.classList.remove('hidden');
+            }
+
+            async function fetchContextAnalysis(phrase, sentence) {
+                const prompt = `Phân tích cụm từ tiếng Anh "${phrase}" trong câu bối cảnh sau: "${sentence}".
+Yêu cầu trả về JSON gồm:
+- "word": Cụm từ/Collocation nguyên bản chuẩn nhất.
+- "type": Loại từ/cấu trúc (Collocation, Phrasal Verb, Idiom, Noun Phrase, Word...).
+- "meaning": Ý nghĩa chính xác theo bối cảnh câu tiếng Việt ngắn gọn.
+- "collocation": Cấu trúc đầy đủ chứa cụm từ đó (ví dụ: stumble across sth).`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                word: { type: "STRING" },
+                                type: { type: "STRING" },
+                                meaning: { type: "STRING" },
+                                collocation: { type: "STRING" }
+                            },
+                            required: ["word", "type", "meaning", "collocation"]
+                        }
+                    }
+                };
+
+                try {
+                    const data = await callGeminiApi(payload);
+                    const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!rawJson) throw new Error("Lỗi tra từ!");
+                    const result = JSON.parse(rawJson);
+
+                    currentContextData = {
+                        id: Date.now(),
+                        word: result.word || phrase,
+                        type: result.type || 'Vocabulary',
+                        meaning: result.meaning,
+                        collocation: result.collocation,
+                        sentence: sentence,
+                        date: new Date().toLocaleDateString('vi-VN')
+                    };
+
+                    if (modalTypeBadge) modalTypeBadge.textContent = currentContextData.type;
+                    if (modalWordTitle) modalWordTitle.textContent = currentContextData.word;
+                    if (modalMeaningText) modalMeaningText.textContent = currentContextData.meaning;
+                    if (modalCollocationText) modalCollocationText.textContent = currentContextData.collocation;
+                    if (modalSaveVocabBtn) {
+                        modalSaveVocabBtn.disabled = false;
+                        modalSaveVocabBtn.innerHTML = `<span>➕ Lưu vào thư viện</span>`;
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    if (modalMeaningText) modalMeaningText.textContent = "Không thể phân tích ngữ cảnh từ này.";
+                }
+            }
+
+            if (closeContextModal) closeContextModal.addEventListener('click', () => contextModal.classList.add('hidden'));
+
+            if (btnAddDictDirect) {
+                btnAddDictDirect.addEventListener('click', async () => {
+                    if (selectedWordTokens.length === 0) return;
+                    const selectedPhrase = selectedWordTokens.map(t => t.cleanText).filter(Boolean).join(' ');
+                    const fullSentence = selectedWordTokens[0].fullSentence;
+
+                    const origBtn = btnAddDictDirect.innerHTML;
+                    btnAddDictDirect.innerHTML = `<div class="loader"></div> <span>Đang lưu...</span>`;
+                    btnAddDictDirect.disabled = true;
+
+                    try {
+                        const prompt = `Phân tích nhanh cụm từ "${selectedPhrase}" trong câu: "${fullSentence}".
+Trả về JSON:
+- "word": Cụm từ/Collocation chuẩn.
+- "type": Phrasal Verb/Collocation/Idiom/Word.
+- "meaning": Nghĩa tiếng Việt theo bối cảnh ngắn gọn.
+- "collocation": Cấu trúc đầy đủ.`;
+
+                        const payload = {
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: {
+                                responseMimeType: "application/json",
+                                responseSchema: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        word: { type: "STRING" },
+                                        type: { type: "STRING" },
+                                        meaning: { type: "STRING" },
+                                        collocation: { type: "STRING" }
+                                    },
+                                    required: ["word", "type", "meaning", "collocation"]
+                                }
+                            }
+                        };
+
+                        const data = await callGeminiApi(payload);
+                        const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        const result = JSON.parse(rawJson);
+
+                        const itemToSave = {
+                            id: Date.now(),
+                            word: result.word || selectedPhrase,
+                            type: result.type || 'Vocab',
+                            meaning: result.meaning || 'Chưa rõ',
+                            collocation: result.collocation || selectedPhrase,
+                            sentence: fullSentence,
+                            date: new Date().toLocaleDateString('vi-VN')
+                        };
+
+                        saveToVocabLibrary(itemToSave);
+                        showToast(`Đã lưu "${itemToSave.word}" vào Thư viện!`);
+                        clearSelection();
+                    } catch (err) {
+                        showToast('Lỗi khi lưu từ vựng!', true);
+                    } finally {
+                        btnAddDictDirect.innerHTML = origBtn;
+                        btnAddDictDirect.disabled = false;
+                    }
+                });
+            }
+
+            if (modalSaveVocabBtn) {
+                modalSaveVocabBtn.addEventListener('click', () => {
+                    if (currentContextData) {
+                        saveToVocabLibrary(currentContextData);
+                        showToast(`Đã lưu "${currentContextData.word}" vào Thư viện!`);
+                        if (contextModal) contextModal.classList.add('hidden');
+                        clearSelection();
+                    }
+                });
+            }
+
+            function saveToVocabLibrary(item) {
+                vocabLibrary.unshift(item);
+                localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                updateVocabBadge();
+            }
+
+            function updateVocabBadge() {
+                if (vocabBadge) vocabBadge.textContent = vocabLibrary.length;
+                if (libCountBadge) libCountBadge.textContent = `${vocabLibrary.length} từ`;
+            }
+
+            if (openLibraryBtn) {
+                openLibraryBtn.addEventListener('click', () => {
+                    renderVocabList();
+                    if (libraryModal) libraryModal.classList.remove('hidden');
+                });
+            }
+
+            if (closeLibraryModal) closeLibraryModal.addEventListener('click', () => libraryModal.classList.add('hidden'));
+
+            function renderVocabList(filterQuery = '') {
+                if (!vocabListContainer) return;
+                vocabListContainer.innerHTML = '';
+                const filtered = vocabLibrary.filter(item => 
+                    item.word.toLowerCase().includes(filterQuery.toLowerCase()) ||
+                    item.meaning.toLowerCase().includes(filterQuery.toLowerCase())
+                );
+
+                if (filtered.length === 0) {
+                    vocabListContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 text-center py-12">Không tìm thấy từ vựng nào.</p>`;
+                    return;
+                }
+
+                filtered.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-50 dark:bg-slate-900/70 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1 relative group hover:border-blue-500 dark:hover:border-blue-700 transition-colors';
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between pr-6">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base break-words">${item.word}</span>
+                                <span class="bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0">${item.type}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 flex-shrink-0">${item.date}</span>
+                        </div>
+                        <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 break-words">${item.meaning}</p>
+                        <p class="text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-1.5 rounded border border-slate-200 dark:border-slate-700 break-words">Cấu trúc: ${item.collocation}</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 italic break-words">"${item.sentence}"</p>
+                        <button onclick="deleteVocabItem(${item.id})" class="absolute top-3 right-3 text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 text-xs">✕</button>
+                    `;
+                    vocabListContainer.appendChild(card);
+                });
+            }
+
+            window.deleteVocabItem = function(id) {
+                vocabLibrary = vocabLibrary.filter(item => item.id !== id);
+                localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                updateVocabBadge();
+                renderVocabList(libSearchInput ? libSearchInput.value : '');
+                showToast('Đã xóa từ vựng.');
+            };
+
+            if (libSearchInput) libSearchInput.addEventListener('input', (e) => renderVocabList(e.target.value));
+
+            if (clearAllVocabBtn) {
+                clearAllVocabBtn.addEventListener('click', () => {
+                    if (vocabLibrary.length === 0) return;
+                    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ thư viện từ vựng?')) {
+                        vocabLibrary = [];
+                        localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                        updateVocabBadge();
+                        renderVocabList();
+                        showToast('Đã xóa toàn bộ thư viện.');
+                    }
+                });
+            }
+
+            if (exportExcelBtn) {
+                exportExcelBtn.addEventListener('click', () => {
+                    if (vocabLibrary.length === 0) return showToast('Thư viện rỗng, chưa có từ để xuất!', true);
+
+                    const exportData = vocabLibrary.map((item, index) => ({
+                        "STT": index + 1,
+                        "Từ / Cụm từ": item.word,
+                        "Từ loại": item.type,
+                        "Nghĩa bối cảnh": item.meaning,
+                        "Cấu trúc đầy đủ": item.collocation,
+                        "Câu bối cảnh": item.sentence
+                    }));
+
+                    const worksheet = XLSX.utils.json_to_sheet(exportData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Tu_Vung_IELTS");
+
+                    worksheet['!cols'] = [
+                        { wch: 5 },
+                        { wch: 18 },
+                        { wch: 10 },
+                        { wch: 20 },
+                        { wch: 20 },
+                        { wch: 32 }
+                    ];
+
+                    const range = XLSX.utils.decode_range(worksheet['!ref']);
+                    for (let R = range.s.r; R <= range.e.r; ++R) {
+                        for (let C = range.s.c; C <= range.e.c; ++C) {
+                            const cell_ref = XLSX.utils.encode_cell({ c: C, r: R });
+                            if (!worksheet[cell_ref]) continue;
+                            if (!worksheet[cell_ref].s) worksheet[cell_ref].s = {};
+                            worksheet[cell_ref].s.alignment = { wrapText: true, vertical: 'top' };
+                        }
+                    }
+
+                    XLSX.writeFile(workbook, `Tu_Vung_AI_Dich_${new Date().toISOString().slice(0,10)}.xlsx`);
+                    showToast('Đã xuất file Excel chuẩn khổ A4 thành công!');
+                });
+            }
+
+            if (copySpecialDataBtn) {
+                copySpecialDataBtn.addEventListener('click', () => {
+                    if (!currentSentencePairs || currentSentencePairs.length === 0) return;
+                    
+                    const fullPackage = {
+                        sentencePairs: currentSentencePairs,
+                        vocabLibrary: vocabLibrary,
+                        youtubeUrl: ytModalUrlInput ? ytModalUrlInput.value.trim() : '',
+                        followEnabled: isFollowEnabled,
+                        playbackSpeed: currentPlaybackSpeed
+                    };
+
+                    const specialJsonString = JSON.stringify(fullPackage);
+
+                    const temp = document.createElement('textarea');
+                    temp.value = specialJsonString;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+
+                    showToast('Đã sao chép mã dữ liệu bài dịch, Video & Sổ từ vựng!');
+                });
+            }
+
+            function openRestoreModal() {
+                if (restoreInputArea) restoreInputArea.value = '';
+                if (restoreModal) restoreModal.classList.remove('hidden');
+            }
+
+            if (restoreDataBtn) restoreDataBtn.addEventListener('click', openRestoreModal);
+            if (emptyRestoreBtn) emptyRestoreBtn.addEventListener('click', openRestoreModal);
+            if (closeRestoreModal) closeRestoreModal.addEventListener('click', () => restoreModal.classList.add('hidden'));
+
+            if (confirmRestoreBtn) {
+                confirmRestoreBtn.addEventListener('click', () => {
+                    const pastedText = restoreInputArea ? restoreInputArea.value.trim() : '';
+                    if (!pastedText) return showToast('Vui lòng dán mã dữ liệu khôi phục!', true);
+
+                    try {
+                        const parsedData = JSON.parse(pastedText);
+                        let restoredPairs = [];
+                        let restoredVocab = null;
+
+                        if (Array.isArray(parsedData)) {
+                            restoredPairs = parsedData;
+                        } else if (parsedData && typeof parsedData === 'object') {
+                            if (Array.isArray(parsedData.sentencePairs)) restoredPairs = parsedData.sentencePairs;
+                            if (Array.isArray(parsedData.vocabLibrary)) restoredVocab = parsedData.vocabLibrary;
+                            
+                            if (parsedData.youtubeUrl) {
+                                if (ytModalUrlInput) ytModalUrlInput.value = parsedData.youtubeUrl;
+                                loadYoutubeVideo(parsedData.youtubeUrl);
+
+                                document.querySelectorAll('.tab-btn').forEach(b => {
+                                    b.classList.remove('active', 'text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
+                                    b.classList.add('text-slate-600', 'dark:text-slate-400');
+                                });
+                                const ytBtn = getEl('ytTabBtn');
+                                if (ytBtn) {
+                                    ytBtn.classList.add('active', 'text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
+                                }
+                                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                                const tabYt = getEl('tab-youtube');
+                                if (tabYt) tabYt.classList.remove('hidden');
+                                if (translateBtn) translateBtn.classList.add('hidden');
+                            }
+
+                            if (parsedData.playbackSpeed) {
+                                currentPlaybackSpeed = parsedData.playbackSpeed;
+                                if (speedSlider) speedSlider.value = currentPlaybackSpeed;
+                                if (speedValText) speedValText.textContent = parseFloat(currentPlaybackSpeed).toFixed(2) + 'x';
+                            }
+
+                            if (parsedData.followEnabled !== undefined) {
+                                isFollowEnabled = parsedData.followEnabled;
+                                updateFollowBtnUI();
+                            }
+                        }
+
+                        if (restoredPairs.length === 0 && (!restoredVocab || restoredVocab.length === 0)) {
+                            throw new Error("Mã dữ liệu không hợp lệ.");
+                        }
+
+                        if (restoredPairs.length > 0) {
+                            renderResults(restoredPairs);
+                        }
+
+                        if (restoredVocab && restoredVocab.length > 0) {
+                            const existingIds = new Set(vocabLibrary.map(v => v.id));
+                            restoredVocab.forEach(item => {
+                                if (!existingIds.has(item.id)) {
+                                    vocabLibrary.push(item);
+                                    existingIds.add(item.id);
+                                }
+                            });
+                            localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                            updateVocabBadge();
+                        }
+
+                        if (restoreModal) restoreModal.classList.add('hidden');
+                        showToast('Khôi phục bài dịch & sổ từ vựng thành công!');
+                    } catch (e) {
+                        showToast('Mã dữ liệu không đúng định dạng khôi phục.', true);
+                    }
+                });
+            }
+
+            if (copyResultBtn) {
+                copyResultBtn.addEventListener('click', () => {
+                    const cards = outputContainer.querySelectorAll('.sentence-card');
+                    let text = "";
+                    cards.forEach(c => {
+                        const en = c.querySelector('.en-container')?.textContent || '';
+                        const vi = c.querySelector('.vi-text')?.textContent || '';
+                        if (en) text += `${en}\n${vi}\n\n`;
+                    });
+
+                    const temp = document.createElement('textarea');
+                    temp.value = text.trim();
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+                    showToast('Đã sao chép văn bản bài dịch!');
+                });
+            }
+
+            let toastTimeout;
+            function showToast(msg, isError = false) {
+                if (!toast) return;
+                toast.textContent = msg;
+                toast.className = `fixed bottom-5 right-5 px-4 py-2.5 rounded-xl shadow-xl text-xs z-50 transform transition-all duration-300 pointer-events-none ${isError ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 2500);
+            }
+
+            updateVocabBadge();
+            if (!getSavedApiKey()) {
+                setTimeout(openApiKeyModal, 500);
+            }
+        });
+    </script>
+</body>
+</html>
