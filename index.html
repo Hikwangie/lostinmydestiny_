@@ -490,7 +490,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Câu gốc</p>
+                    <p class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase">Ví dụ minh họa (B2–C1)</p>
                     <p id="modalSentenceContext" class="text-xs text-slate-600 dark:text-slate-300 italic bg-amber-50/60 dark:bg-amber-950/40 p-2.5 rounded-lg border border-amber-200/60 dark:border-amber-800/60 mt-1 break-words">...</p>
                 </div>
             </div>
@@ -1530,18 +1530,19 @@ Nhiệm vụ:
                 if (modalWordTitle) modalWordTitle.textContent = phrase;
                 if (modalMeaningText) modalMeaningText.innerHTML = `<span class="loader"></span> Đang phân tích bối cảnh...`;
                 if (modalCollocationText) modalCollocationText.textContent = "...";
-                if (modalSentenceContext) modalSentenceContext.textContent = `"${sentence}"`;
+                if (modalSentenceContext) modalSentenceContext.textContent = `...`;
                 if (modalSaveVocabBtn) modalSaveVocabBtn.disabled = true;
                 if (contextModal) contextModal.classList.remove('hidden');
             }
 
             async function fetchContextAnalysis(phrase, sentence) {
-                const prompt = `Phân tích cụm từ tiếng Anh "${phrase}" trong câu bối cảnh sau: "${sentence}".
+                const prompt = `Phân tích cụm từ tiếng Anh "${phrase}" trong câu ngữ cảnh gốc sau: "${sentence}".
 Yêu cầu trả về JSON gồm:
 - "word": Cụm từ/Collocation nguyên bản chuẩn nhất.
-- "type": Loại từ/cấu trúc (Collocation, Phrasal Verb, Idiom, Noun Phrase, Word...).
-- "meaning": Ý nghĩa chính xác theo bối cảnh câu tiếng Việt ngắn gọn.
-- "collocation": Cấu trúc đầy đủ chứa cụm từ đó (ví dụ: stumble across sth).`;
+- "type": Từ loại chính xác chuẩn ngữ pháp/ngôn ngữ (Verb, Adjective, Noun, Adverb, Phrasal Verb, Collocation, Idiom, Idiomatic Expression,...).
+- "meaning": Ý nghĩa chính xác của từ/cụm từ theo bối cảnh bài học (ngắn gọn, dễ hiểu).
+- "collocation": Cấu trúc/cụm đi kèm đầy đủ chứa từ đó (ví dụ: stumble across sth).
+- "example": Tạo 01 câu ví dụ tiếng Anh MỚI hoàn toàn ở trình độ B2 đến C1 (độ dài vừa đủ, không quá ngắn, không quá dài, câu có cấu trúc hay nhưng dễ hiểu) có chứa từ/cụm từ trên với ĐÚNG nét nghĩa trong bài học. Tuyệt đối KHÔNG lấy lại câu gốc từ bài học.`;
 
                 const payload = {
                     contents: [{ parts: [{ text: prompt }] }],
@@ -1553,9 +1554,10 @@ Yêu cầu trả về JSON gồm:
                                 word: { type: "STRING" },
                                 type: { type: "STRING" },
                                 meaning: { type: "STRING" },
-                                collocation: { type: "STRING" }
+                                collocation: { type: "STRING" },
+                                example: { type: "STRING" }
                             },
-                            required: ["word", "type", "meaning", "collocation"]
+                            required: ["word", "type", "meaning", "collocation", "example"]
                         }
                     }
                 };
@@ -1572,7 +1574,7 @@ Yêu cầu trả về JSON gồm:
                         type: result.type || 'Vocabulary',
                         meaning: result.meaning,
                         collocation: result.collocation,
-                        sentence: sentence,
+                        sentence: result.example || sentence,
                         date: new Date().toLocaleDateString('vi-VN')
                     };
 
@@ -1580,6 +1582,7 @@ Yêu cầu trả về JSON gồm:
                     if (modalWordTitle) modalWordTitle.textContent = currentContextData.word;
                     if (modalMeaningText) modalMeaningText.textContent = currentContextData.meaning;
                     if (modalCollocationText) modalCollocationText.textContent = currentContextData.collocation;
+                    if (modalSentenceContext) modalSentenceContext.textContent = `"${currentContextData.sentence}"`;
                     if (modalSaveVocabBtn) {
                         modalSaveVocabBtn.disabled = false;
                         modalSaveVocabBtn.innerHTML = `<span>➕ Lưu vào thư viện</span>`;
@@ -1604,12 +1607,13 @@ Yêu cầu trả về JSON gồm:
                     btnAddDictDirect.disabled = true;
 
                     try {
-                        const prompt = `Phân tích nhanh cụm từ "${selectedPhrase}" trong câu: "${fullSentence}".
+                        const prompt = `Phân tích nhanh cụm từ "${selectedPhrase}" trong câu gốc: "${fullSentence}".
 Trả về JSON:
 - "word": Cụm từ/Collocation chuẩn.
-- "type": Phrasal Verb/Collocation/Idiom/Word.
+- "type": Từ loại chính xác (Verb, Adjective, Noun, Adverb, Phrasal Verb, Collocation, Idiom, Idiomatic Expression,...).
 - "meaning": Nghĩa tiếng Việt theo bối cảnh ngắn gọn.
-- "collocation": Cấu trúc đầy đủ.`;
+- "collocation": Cấu trúc đầy đủ.
+- "example": Tạo 01 câu ví dụ tiếng Anh MỚI hoàn toàn ở trình độ B2 đến C1 (độ dài vừa đủ, không quá ngắn, không quá dài) chứa cụm từ trên với ĐÚNG nét nghĩa trong bài. Tuyệt đối KHÔNG lấy lại câu gốc.`;
 
                         const payload = {
                             contents: [{ parts: [{ text: prompt }] }],
@@ -1621,9 +1625,10 @@ Trả về JSON:
                                         word: { type: "STRING" },
                                         type: { type: "STRING" },
                                         meaning: { type: "STRING" },
-                                        collocation: { type: "STRING" }
+                                        collocation: { type: "STRING" },
+                                        example: { type: "STRING" }
                                     },
-                                    required: ["word", "type", "meaning", "collocation"]
+                                    required: ["word", "type", "meaning", "collocation", "example"]
                                 }
                             }
                         };
@@ -1638,7 +1643,7 @@ Trả về JSON:
                             type: result.type || 'Vocab',
                             meaning: result.meaning || 'Chưa rõ',
                             collocation: result.collocation || selectedPhrase,
-                            sentence: fullSentence,
+                            sentence: result.example || fullSentence,
                             date: new Date().toLocaleDateString('vi-VN')
                         };
 
@@ -1713,7 +1718,7 @@ Trả về JSON:
                         </div>
                         <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 break-words">${item.meaning}</p>
                         <p class="text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-1.5 rounded border border-slate-200 dark:border-slate-700 break-words">Cấu trúc: ${item.collocation}</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 italic break-words">"${item.sentence}"</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 italic break-words">Ví dụ: "${item.sentence}"</p>
                         <button onclick="deleteVocabItem(${item.id})" class="absolute top-3 right-3 text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 text-xs">✕</button>
                     `;
                     vocabListContainer.appendChild(card);
@@ -1753,11 +1758,11 @@ Trả về JSON:
 
                     const exportData = vocabLibrary.map((item, index) => ({
                         "STT": index + 1,
-                        "Từ / Cụm từ": item.word,
+                        "Từ/Cụm từ": item.word,
                         "Từ loại": item.type,
-                        "Nghĩa bối cảnh": item.meaning,
+                        "Nghĩa": item.meaning,
                         "Cấu trúc đầy đủ": item.collocation,
-                        "Câu bối cảnh": item.sentence
+                        "Ví dụ": item.sentence
                     }));
 
                     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -1767,10 +1772,10 @@ Trả về JSON:
                     worksheet['!cols'] = [
                         { wch: 5 },
                         { wch: 18 },
-                        { wch: 10 },
-                        { wch: 20 },
-                        { wch: 20 },
-                        { wch: 32 }
+                        { wch: 12 },
+                        { wch: 22 },
+                        { wch: 22 },
+                        { wch: 38 }
                     ];
 
                     const range = XLSX.utils.decode_range(worksheet['!ref']);
