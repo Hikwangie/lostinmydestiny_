@@ -654,7 +654,6 @@
             const restoreInputArea = getEl('restoreInputArea');
             const confirmRestoreBtn = getEl('confirmRestoreBtn');
 
-            /* Theme Toggle logic (Fast transition, Instant toggle) */
             function applyTheme(isDark) {
                 try {
                     if (isDark) {
@@ -694,7 +693,11 @@
             }
 
             function getSavedApiKey() {
-                return localStorage.getItem('gemini_api_key') || "";
+                try {
+                    return localStorage.getItem('gemini_api_key') || "";
+                } catch(e) {
+                    return "";
+                }
             }
 
             async function callGeminiApi(payload, retries = 5) {
@@ -745,7 +748,9 @@
                 saveApiKeyBtn.addEventListener('click', () => {
                     const val = userApiKeyInput ? userApiKeyInput.value.trim() : '';
                     if (!val) return showToast('Vui lòng nhập API Key!', true);
-                    localStorage.setItem('gemini_api_key', val);
+                    try {
+                        localStorage.setItem('gemini_api_key', val);
+                    } catch(e){}
                     apiKeyModal.classList.add('hidden');
                     showToast('Đã lưu API Key thành công!');
                 });
@@ -811,7 +816,11 @@
             let selectedWordTokens = [];
             let currentContextData = null;
             let currentSentencePairs = [];
-            let vocabLibrary = JSON.parse(localStorage.getItem('vocab_library') || '[]');
+            let vocabLibrary = [];
+            try {
+                vocabLibrary = JSON.parse(localStorage.getItem('vocab_library') || '[]');
+            } catch(e){ vocabLibrary = []; }
+            
             let isViHidden = false;
 
             let ytPlayer = null;
@@ -1160,6 +1169,42 @@
                 renderImageList();
             };
 
+            function cleanSentencePairs(pairs) {
+                if (!Array.isArray(pairs)) return [];
+                return pairs.map(pair => {
+                    let en = (pair.en || '').trim();
+                    let vi = (pair.vi || '').trim();
+
+                    // Standardize purely music tags
+                    const isPureMusic = /^\[music\]$/i.test(en) || /^\[âm nhạc\]$/i.test(en);
+                    if (isPureMusic) {
+                        return {
+                            ...pair,
+                            en: '[music]',
+                            vi: '[Âm nhạc]'
+                        };
+                    }
+
+                    // Remove inline music/âm nhạc tags if actual spoken text exists
+                    en = en.replace(/\[music\]/gi, '').replace(/\[âm nhạc\]/gi, '').replace(/\s+/g, ' ').trim();
+                    vi = vi.replace(/\[âm nhạc\]/gi, '').replace(/\[music\]/gi, '').replace(/\s+/g, ' ').trim();
+
+                    // Strip any accidental "Dịch:" or "Dịch : " prefix returned by model
+                    vi = vi.replace(/^Dịch\s*:\s*/i, '').trim();
+
+                    // If VI is left empty or echoes EN exactly due to short words, ensure clean fallback or string
+                    if (!vi) {
+                        vi = en;
+                    }
+
+                    return {
+                        ...pair,
+                        en: en,
+                        vi: vi
+                    };
+                });
+            }
+
             async function executeTranslation(activeTabId) {
                 clearSelection();
 
@@ -1179,7 +1224,7 @@ Nhiệm vụ:
 3. Bắt buộc tách kết quả theo TỪNG CÂU HOÀN CHỈNH.
 4. Trả về định dạng JSON Array chứa các cặp:
    - "en": Câu tiếng Anh nguyên bản (đã nối gãy).
-   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
+   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh. KHÔNG bao giờ thêm tiền tố "Dịch:".`;
 
                     responseSchema = {
                         type: "ARRAY",
@@ -1204,7 +1249,7 @@ Nhiệm vụ:
 Nhiệm vụ:
 1. Nhận hình ảnh tiếng Anh đầu vào.
 2. Nối các câu bị đứt gãy thành các CÂU HOÀN CHỈNH.
-3. Trả về định dạng JSON Array chứa: "en", "vi".`;
+3. Trả về định dạng JSON Array chứa: "en", "vi". KHÔNG bao giờ thêm tiền tố "Dịch:".`;
 
                     responseSchema = {
                         type: "ARRAY",
@@ -1240,17 +1285,15 @@ Nhiệm vụ:
 
                     systemPrompt = `Bạn là chuyên gia dịch thuật và xử lý transcript YouTube Anh - Việt.
 Nhiệm vụ:
-1. Nhận transcript tiếng Anh thô có mốc thời gian (ví dụ: 0:00, 0:05, 0:07...).
-2. BẮT BUỘC GIỮ NGUYÊN 100% TỪNG MỐC THỜI GIAN VÀ CỤM TIẾNG ANH ĐI KÈM CỦA DÒNG ĐÓ. KHÔNG ĐƯỢC gộp các mốc thời gian lại với nhau, KHÔNG ĐƯỢC tách hay biến đổi thành các câu mới theo dấu chấm.
-3. Dịch từng cụm tiếng Anh tương ứng với mốc thời gian đó sang tiếng Việt một cách tự nhiên theo ngữ cảnh toàn bài.
-4. Xử lý nhãn '[music]' / '[Music]':
-   - Nếu dòng transcript có kèm các từ/chữ khác ngoài '[music]', hãy BỎ hẳn nhãn '[music]' đó đi để cụm từ không bị vỡ.
-   - Nếu dòng transcript CHỈ CHỨA DUY NHẤT từ '[music]', hãy GIỮ NGUYÊN dòng đó và dịch "vi" là "[Âm nhạc]".
-5. Trả về định dạng JSON Array chứa các phần tử:
-   - "time": Mốc thời gian nguyên bản (ví dụ "00:07", "01:14").
-   - "seconds": Thời gian tính bằng giây quy đổi ra số (ví dụ 7, 74).
-   - "en": Cụm tiếng Anh nguyên bản tương ứng mốc thời gian (đã bỏ nhãn [music] thừa nếu có chữ đi kèm).
-   - "vi": Nghĩa tiếng Việt của cụm tiếng Anh đó.`;
+1. Nhận transcript tiếng Anh có mốc thời gian (ví dụ 00:16, 06:26...).
+2. Bắt buộc GIỮ NGUYÊN từng mốc thời gian theo đúng từng dòng transcript gốc (KHÔNG gộp hay nối câu theo dấu chấm). Mỗi mốc thời gian tạo thành 1 dòng transcript riêng biệt.
+3. Làm sạch hoàn toàn các thẻ '[music]' hoặc '[Music]': Nếu dòng transcript có từ khác ngoài '[music]', BỎ HẮN nhãn '[music]' cả ở phần tiếng Anh và tiếng Việt (tuyệt đối KHÔNG xuất hiện '[âm nhạc]' trong tiếng Việt nếu tiếng Anh có từ nói). Nếu một dòng transcript CHỈ CHỨA DUY NHẤT từ '[music]', hãy GIỮ NGUYÊN tiếng Anh '[music]' và dịch tiếng Việt '[Âm nhạc]'.
+4. Bắt buộc dịch mượt mà sang tiếng Việt cho TẤT CẢ các dòng, kể cả dòng chỉ có 1-2 từ (ví dụ: 'species' -> 'loài', 'developed' -> 'phát triển'). Tuyệt đối KHÔNG giữ nguyên tiếng Anh ở phần 'vi', KHÔNG bao giờ thêm tiền tố 'Dịch:'.
+5. Trả về định dạng JSON Array chứa:
+   - "time": Mốc thời gian nguyên bản (ví dụ "00:16").
+   - "seconds": Thời gian tính bằng giây quy đổi ra số.
+   - "en": Câu/Cụm từ tiếng Anh đã làm sạch [music] thừa.
+   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
 
                     responseSchema = {
                         type: "ARRAY",
@@ -1293,8 +1336,10 @@ Nhiệm vụ:
                     const data = await callGeminiApi(payload);
                     const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (!rawJson) throw new Error("Không nhận được dữ liệu từ AI");
-                    currentSentencePairs = JSON.parse(rawJson);
                     
+                    const parsedPairs = JSON.parse(rawJson);
+                    currentSentencePairs = cleanSentencePairs(parsedPairs);
+
                     currentSentencePairs.forEach(pair => {
                         if (pair.time && (pair.seconds === undefined || pair.seconds === null)) {
                             pair.seconds = parseTimeToSeconds(pair.time);
@@ -1622,7 +1667,9 @@ Trả về JSON:
 
             function saveToVocabLibrary(item) {
                 vocabLibrary.unshift(item);
-                localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                try {
+                    localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                } catch(e){}
                 updateVocabBadge();
             }
 
@@ -1675,7 +1722,9 @@ Trả về JSON:
 
             window.deleteVocabItem = function(id) {
                 vocabLibrary = vocabLibrary.filter(item => item.id !== id);
-                localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                try {
+                    localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                } catch(e){}
                 updateVocabBadge();
                 renderVocabList(libSearchInput ? libSearchInput.value : '');
                 showToast('Đã xóa từ vựng.');
@@ -1688,7 +1737,9 @@ Trả về JSON:
                     if (vocabLibrary.length === 0) return;
                     if (confirm('Bạn có chắc chắn muốn xóa toàn bộ thư viện từ vựng?')) {
                         vocabLibrary = [];
-                        localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                        try {
+                            localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                        } catch(e){}
                         updateVocabBadge();
                         renderVocabList();
                         showToast('Đã xóa toàn bộ thư viện.');
@@ -1830,7 +1881,7 @@ Trả về JSON:
                         }
 
                         if (restoredPairs.length > 0) {
-                            renderResults(restoredPairs);
+                            renderResults(cleanSentencePairs(restoredPairs));
                         }
 
                         // Bổ sung từ vựng mới từ mã khôi phục vào Sổ từ vựng hiện tại (không xóa từ cũ)
@@ -1844,7 +1895,9 @@ Trả về JSON:
                                     addedCount++;
                                 }
                             });
-                            localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                            try {
+                                localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                            } catch(e){}
                             updateVocabBadge();
                         }
 
