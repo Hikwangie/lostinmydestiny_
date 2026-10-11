@@ -32,6 +32,18 @@
             font-family: 'Be Vietnam Pro', sans-serif !important;
         }
 
+        /* Chặn phóng to kép khi nhấp đúp/nhấp liên tục trên Safari/iOS nhưng vẫn giữ pinch-to-zoom 2 ngón */
+        html, body, button, a, input, select, textarea, [role="button"], .word-token, .sentence-card {
+            touch-action: manipulation;
+        }
+
+        /* Ngăn hiện bóng kính lúp hoặc menu bôi đen khi nhấn giữ nút/thẻ tương tác */
+        button, a, [role="button"], .word-token, #transcriptNavControls, #dragHandleNav {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -179,6 +191,14 @@
 
         .animate-slide-up-modal {
             animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        #dragHandleNav {
+            touch-action: none;
+            cursor: grab;
+        }
+        #dragHandleNav:active {
+            cursor: grabbing;
         }
     </style>
 </head>
@@ -393,7 +413,15 @@
     </main>
 
     <!-- CỤM ĐIỀU HƯỚNG TÁCH BIỆT THÀNH KHỐI RIÊNG BIỆT (Không nằm trong card transcript) -->
-    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex-col items-center gap-2 hidden">
+    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex-col items-center gap-2 hidden select-none touch-none">
+        <!-- Nút Kéo Thả Di Chuyển (Drag Handle) -->
+        <button id="dragHandleNav" type="button" class="w-9 sm:w-10 h-7 rounded-lg bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600/80 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors shadow-inner" title="Nhấn giữ và kéo để di chuyển vị trí">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/>
+                <circle cx="15" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+            </svg>
+        </button>
+
         <!-- Nút Lướt câu trước -->
         <button id="prevSentenceBtn" class="w-9 sm:w-10 h-12 sm:h-14 rounded-xl bg-slate-50 dark:bg-slate-700/80 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 flex items-center justify-center transition-all duration-150 active:scale-95 group" title="Câu thoại trước">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-y-0.5 transition-transform"><path d="m18 15-6-6-6 6"/></svg>
@@ -644,6 +672,7 @@
             const speedValText = getEl('speedValText');
 
             const transcriptNavControls = getEl('transcriptNavControls');
+            const dragHandleNav = getEl('dragHandleNav');
             const prevSentenceBtn = getEl('prevSentenceBtn');
             const nextSentenceBtn = getEl('nextSentenceBtn');
             const playPauseVideoBtn = getEl('playPauseVideoBtn');
@@ -1678,6 +1707,96 @@ Nhiệm vụ:
                     e.stopPropagation();
                     navigateSentence(1);
                 });
+            }
+
+            if (transcriptNavControls && dragHandleNav) {
+                let isDragging = false;
+                let startX = 0, startY = 0;
+                let initialLeft = 0, initialTop = 0;
+
+                const onDragStart = (clientX, clientY) => {
+                    isDragging = true;
+                    startX = clientX;
+                    startY = clientY;
+                    const rect = transcriptNavControls.getBoundingClientRect();
+                    initialLeft = rect.left;
+                    initialTop = rect.top;
+
+                    // Hủy transform dịch tâm để tính toán toạ độ tuyệt đối pixel chính xác
+                    transcriptNavControls.style.transform = 'none';
+                    transcriptNavControls.style.right = 'auto';
+                    transcriptNavControls.style.bottom = 'auto';
+                    transcriptNavControls.style.left = `${initialLeft}px`;
+                    transcriptNavControls.style.top = `${initialTop}px`;
+                    transcriptNavControls.classList.add('ring-2', 'ring-blue-500/70', 'shadow-blue-500/30');
+                    dragHandleNav.style.cursor = 'grabbing';
+                };
+
+                const onDragMove = (clientX, clientY) => {
+                    if (!isDragging) return;
+                    const deltaX = clientX - startX;
+                    const deltaY = clientY - startY;
+
+                    let newLeft = initialLeft + deltaX;
+                    let newTop = initialTop + deltaY;
+
+                    // Giữ trọn vẹn cụm nút bên trong khung nhìn màn hình
+                    const rect = transcriptNavControls.getBoundingClientRect();
+                    const maxLeft = window.innerWidth - rect.width - 6;
+                    const maxTop = window.innerHeight - rect.height - 6;
+
+                    newLeft = Math.max(6, Math.min(newLeft, maxLeft));
+                    newTop = Math.max(6, Math.min(newTop, maxTop));
+
+                    transcriptNavControls.style.left = `${newLeft}px`;
+                    transcriptNavControls.style.top = `${newTop}px`;
+                };
+
+                const onDragEnd = () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    transcriptNavControls.classList.remove('ring-2', 'ring-blue-500/70', 'shadow-blue-500/30');
+                    dragHandleNav.style.cursor = 'grab';
+                };
+
+                // Kéo bằng chuột
+                dragHandleNav.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDragStart(e.clientX, e.clientY);
+
+                    const onMouseMove = (moveEvent) => {
+                        onDragMove(moveEvent.clientX, moveEvent.clientY);
+                    };
+                    const onMouseUp = () => {
+                        onDragEnd();
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                    };
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+
+                // Kéo bằng chạm cảm ứng (Mobile / Safari iOS / iPad)
+                dragHandleNav.addEventListener('touchstart', (e) => {
+                    if (e.touches && e.touches.length > 0) {
+                        e.stopPropagation();
+                        const touch = e.touches[0];
+                        onDragStart(touch.clientX, touch.clientY);
+                    }
+                }, { passive: false });
+
+                dragHandleNav.addEventListener('touchmove', (e) => {
+                    if (isDragging && e.touches && e.touches.length > 0) {
+                        e.preventDefault(); // Ngăn cuộn trang web khi đang kéo cụm nút
+                        e.stopPropagation();
+                        const touch = e.touches[0];
+                        onDragMove(touch.clientX, touch.clientY);
+                    }
+                }, { passive: false });
+
+                dragHandleNav.addEventListener('touchend', () => onDragEnd());
+                dragHandleNav.addEventListener('touchcancel', () => onDragEnd());
             }
 
             function toggleWordSelection(span) {
