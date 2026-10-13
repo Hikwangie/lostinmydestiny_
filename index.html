@@ -652,13 +652,12 @@
 
             const transcriptNavControls = getEl('transcriptNavControls');
             const dragHandleNav = getEl('dragHandleNav');
+            const bookmarkNavBtn = getEl('bookmarkNavBtn');
             const prevSentenceBtn = getEl('prevSentenceBtn');
             const nextSentenceBtn = getEl('nextSentenceBtn');
             const playPauseVideoBtn = getEl('playPauseVideoBtn');
             const playPauseIconPause = getEl('playPauseIconPause');
             const playPauseIconPlay = getEl('playPauseIconPlay');
-            const pauseRedCircleBtn = getEl('pauseRedCircleBtn');
-            const pauseRedCircleWrapper = getEl('pauseRedCircleWrapper');
             const openYtEditModalBtn = getEl('openYtEditModalBtn');
             const ytEditModal = getEl('ytEditModal');
             const closeYtEditModal = getEl('closeYtEditModal');
@@ -1572,23 +1571,32 @@ Nhiệm vụ:
                 if (isPaused) {
                     if (playPauseIconPause) playPauseIconPause.classList.add('hidden');
                     if (playPauseIconPlay) playPauseIconPlay.classList.remove('hidden');
-                    if (pauseRedCircleWrapper) {
-                        pauseRedCircleWrapper.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
-                        pauseRedCircleWrapper.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                    
+                    // Khi DỪNG: ửng đỏ lên, mở khóa để bấm đánh dấu
+                    if (bookmarkNavBtn) {
+                        bookmarkNavBtn.className = 'w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-md active:scale-95 border border-rose-400 cursor-pointer flex items-center justify-center transition-all duration-150';
+                        bookmarkNavBtn.title = 'Đánh dấu đỏ câu thoại đang dừng';
                     }
                 } else {
                     if (playPauseIconPlay) playPauseIconPlay.classList.add('hidden');
                     if (playPauseIconPause) playPauseIconPause.classList.remove('hidden');
-                    if (pauseRedCircleWrapper) {
-                        pauseRedCircleWrapper.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
-                        pauseRedCircleWrapper.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+                    
+                    // Khi CHẠY: màu xanh nước biển, vô hiệu hóa (ấn vô tác dụng)
+                    if (bookmarkNavBtn) {
+                        bookmarkNavBtn.className = 'w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-blue-600 text-white/50 cursor-not-allowed opacity-50 border border-blue-400/30 flex items-center justify-center transition-all duration-200';
+                        bookmarkNavBtn.title = 'Tạm dừng video để đánh dấu câu';
                     }
                 }
             }
 
-            if (pauseRedCircleBtn) {
-                pauseRedCircleBtn.addEventListener('click', (e) => {
+            if (bookmarkNavBtn) {
+                bookmarkNavBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    // Khi đang chạy script: ấn vô tác dụng
+                    if (!isVideoPaused) {
+                        return;
+                    }
+
                     if (!outputContainer) return;
 
                     let targetIdx = currentActiveSentenceIndex;
@@ -1600,9 +1608,9 @@ Nhiệm vụ:
                     const cards = outputContainer.querySelectorAll('.sentence-card');
                     const targetCard = cards[targetIdx];
                     if (targetCard) {
-                        const bookmarkBtn = targetCard.querySelector('button');
-                        if (bookmarkBtn) {
-                            toggleMarkSentence(targetIdx, targetCard, bookmarkBtn);
+                        const cardBookmarkBtn = targetCard.querySelector('button');
+                        if (cardBookmarkBtn) {
+                            toggleMarkSentence(targetIdx, targetCard, cardBookmarkBtn);
                         }
                     } else {
                         showToast('Chưa có câu thoại để đánh dấu!', true);
