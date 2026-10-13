@@ -2,7 +2,7 @@
 <html lang="vi" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Dịch Song Ngữ & Tra Từ Vựng Context</title>
     <!-- Google Font: Be Vietnam Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,16 +32,24 @@
             font-family: 'Be Vietnam Pro', sans-serif !important;
         }
 
-        /* Chặn phóng to kép khi nhấp đúp/nhấp liên tục trên Safari/iOS nhưng vẫn giữ pinch-to-zoom 2 ngón */
-        html, body, button, a, input, select, textarea, [role="button"], .word-token, .sentence-card {
-            touch-action: manipulation;
+        /* Tối ưu cảm ứng Safari / iPad chống zoom ngoài ý muốn nhưng không chặn click */
+        html, body {
+            touch-action: pan-x pan-y !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
-        /* Ngăn hiện bóng kính lúp hoặc menu bôi đen khi nhấn giữ nút/thẻ tương tác */
-        button, a, [role="button"], .word-token, #transcriptNavControls, #dragHandleNav {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a, [role="button"], input, textarea, select, .word-token, .sentence-card {
+            touch-action: manipulation !important;
+            cursor: pointer;
         }
 
         ::-webkit-scrollbar {
@@ -110,7 +118,6 @@
             box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
         }
 
-        /* Biến font-size & spacing động cho khung Output */
         #outputContainer {
             --font-en-scale: 1.14;
             --font-vi-scale: 1.13;
@@ -131,7 +138,6 @@
             border: 1.5px solid transparent !important;
         }
 
-        /* Khi active: Viền #369694 không phát sáng, card #15222A trong Dark Mode */
         #outputContainer > div.sentence-card.active-transcript {
             border: 2px solid #369694 !important;
             box-shadow: none !important;
@@ -144,7 +150,6 @@
             background-color: #15222A !important;
         }
 
-        /* Thẻ được đánh dấu (đỏ ửng nhẹ tinh tế, không chói) */
         #outputContainer > div.sentence-card.marked-card {
             background-color: #fff1f2 !important;
             border-color: #fda4af !important;
@@ -155,7 +160,6 @@
             border-color: #e11d48 !important;
         }
 
-        /* Khi thẻ vừa được đánh dấu vừa đang phát active */
         #outputContainer > div.sentence-card.marked-card.active-transcript {
             border: 2px solid #e11d48 !important;
             box-shadow: 0 0 0 1px #e11d48 !important;
@@ -202,10 +206,9 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 font-sans pb-24 transition-colors duration-75">
+<body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 font-sans transition-colors duration-75 flex flex-col">
 
-    <!-- Header chính -->
-    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm py-2 px-4 transition-colors duration-75">
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm py-2 px-4 transition-colors duration-75 flex-shrink-0">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="bg-blue-600 text-white p-1.5 rounded-lg shadow-sm">
@@ -232,10 +235,10 @@
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
+    <main class="max-w-6xl mx-auto px-4 py-5 space-y-5 flex-1 w-full overflow-y-auto">
 
         <!-- Tabs chuyển chế độ nhập liệu -->
-        <div id="tabsHeader" class="bg-white dark:bg-slate-800 p-1.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 transition-colors duration-75">
+        <div id="tabsHeader" class="bg-white dark:bg-slate-800 p-1.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 transition-colors duration-75 flex-shrink-0">
             <button class="tab-btn active flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800" data-tab="tab-text">
                 📝 Văn bản
             </button>
@@ -249,7 +252,6 @@
 
         <div id="mainGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
-            <!-- Cột Trái: Input -->
             <div id="inputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] transition-all overflow-hidden">
                 
                 <div id="inputCardHeader" class="flex items-center justify-between mb-2 flex-shrink-0">
@@ -285,8 +287,8 @@
                 <!-- Tab 3: Video YouTube -->
                 <div id="tab-youtube" class="tab-content flex-1 flex flex-col hidden space-y-2.5 min-h-0 overflow-y-auto pr-1">
                     
-                    <!-- Khung phát Video YouTube (~1/4 diện tích) -->
-                    <div id="ytPlayerContainer" class="w-full h-44 sm:h-52 bg-black rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                    <!-- Khung phát Video YouTube to ra cho vừa chuẩn tỉ lệ aspect-video -->
+                    <div id="ytPlayerContainer" class="w-full aspect-video min-h-[220px] sm:min-h-[260px] bg-black rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative flex items-center justify-center border border-slate-200 dark:border-slate-700">
                         <p class="text-xs text-slate-500 text-center px-4">Nhấn <b>"Chỉnh sửa, đổi Video & Transcript"</b> ở bên dưới để nhập link và bài nói</p>
                     </div>
 
@@ -308,28 +310,6 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         <span>Chỉnh sửa, đổi Video & Transcript</span>
                     </button>
-
-                    <!-- Toàn bộ NÚT TÁC VỤ đưa xuống bên dưới Video YouTube -->
-                    <div id="ytActionButtonsRow" class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-100 dark:border-slate-700/80 flex-shrink-0">
-                        <button id="ytToggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2.5 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600">
-                            <span class="ytToggleViIcon">👁️</span> <span class="ytToggleViText">Nghĩa Việt</span>
-                        </button>
-
-                        <button id="ytToggleSlidersBtn" class="text-[11px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60" title="Chỉnh cỡ chữ & khoảng cách">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <span>Chỉnh giao diện</span>
-                        </button>
-
-                        <button id="ytRestoreDataBtn" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60" title="Dán dữ liệu đã chép để khôi phục">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
-                            <span>Dán khôi phục</span>
-                        </button>
-
-                        <button id="ytCopySpecialBtn" class="text-[11px] text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60" title="Sao chép toàn bộ dữ liệu">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                            <span>Sao chép dữ liệu</span>
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Nút bấm dịch chuẩn cho Tab Text & Tab Ảnh -->
@@ -339,7 +319,6 @@
                 </button>
             </div>
 
-            <!-- Cột Phải: Kết quả Output -->
             <div id="outputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] relative transition-all lg:col-span-1 overflow-hidden">
                 
                 <!-- Thanh công cụ Output -->
@@ -349,7 +328,7 @@
                         <span>Hiện nhập liệu</span>
                     </button>
 
-                    <!-- Row chứa 4 nút công cụ nằm trên 1 hàng duy nhất cho tab Văn bản & Ảnh -->
+                    <!-- Row chứa 4 nút công cụ nằm trên 1 hàng duy nhất cho cả 3 tab -->
                     <div id="topActionButtonsGroup" class="flex items-center gap-1 flex-nowrap w-full justify-between">
                         <button id="toggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600 flex-shrink-0 whitespace-nowrap">
                             <span class="toggleViIcon">👁️</span> <span class="toggleViText">Nghĩa Việt</span>
@@ -372,7 +351,6 @@
                     </div>
                 </div>
 
-                <!-- Panel Sliders -->
                 <div id="settingsSlidersPanel" class="bg-white dark:bg-slate-950/80 p-2 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5 hidden animate-slide-up-modal flex-shrink-0 text-[11px]">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-1.5 flex-1 min-w-[110px]">
@@ -412,8 +390,7 @@
         </div>
     </main>
 
-    <!-- CỤM ĐIỀU HƯỚNG TÁCH BIỆT THÀNH KHỐI RIÊNG BIỆT (Không nằm trong card transcript) -->
-    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex-col items-center gap-2 hidden select-none touch-none">
+    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex flex-col items-center gap-2 hidden select-none">
         <!-- Nút Kéo Thả Di Chuyển (Drag Handle) -->
         <button id="dragHandleNav" type="button" class="w-9 sm:w-10 h-7 rounded-lg bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600/80 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors shadow-inner" title="Nhấn giữ và kéo để di chuyển vị trí">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -586,12 +563,10 @@
         Thông báo
     </div>
 
-    <!-- SCRIPT CHÍNH -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const getEl = (id) => document.getElementById(id);
 
-            // Hàm bóc tách JSON an toàn khỏi Markdown code blocks (```json ... ```)
             function safeParseJson(rawStr) {
                 if (!rawStr) throw new Error("Dữ liệu rỗng");
                 let clean = rawStr.trim();
@@ -644,7 +619,6 @@
             const restoreDataBtn = getEl('restoreDataBtn');
             const emptyRestoreBtn = getEl('emptyRestoreBtn');
 
-            const mainGrid = getEl('mainGrid');
             const inputColCard = getEl('inputColCard');
             const outputColCard = getEl('outputColCard');
             const toggleCollapseInputBtn = getEl('toggleCollapseInputBtn');
@@ -684,10 +658,6 @@
             const closeYtEditModal = getEl('closeYtEditModal');
             const modalYtTranslateBtn = getEl('modalYtTranslateBtn');
 
-            const ytToggleViTextBtn = getEl('ytToggleViTextBtn');
-            const ytToggleSlidersBtn = getEl('ytToggleSlidersBtn');
-            const ytRestoreDataBtn = getEl('ytRestoreDataBtn');
-            const ytCopySpecialBtn = getEl('ytCopySpecialBtn');
             const topActionButtonsGroup = getEl('topActionButtonsGroup');
 
             const dropZoneImages = getEl('dropZoneImages');
@@ -741,10 +711,8 @@
 
             if (themeToggleBtn) {
                 themeToggleBtn.addEventListener('click', (e) => {
-                    if (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
+                    e.preventDefault();
+                    e.stopPropagation();
                     isDarkMode = !isDarkMode;
                     try {
                         localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
@@ -753,11 +721,8 @@
                 });
             }
 
-            // Tích hợp Canvas AI Engine - Gọi API từ chính môi trường Canvas của Gemini
             async function callGeminiApi(payload) {
                 const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
-                
-                // Môi trường Canvas xử lý request trực tiếp
                 try {
                     const response = await fetch(API_ENDPOINT, {
                         method: 'POST',
@@ -766,7 +731,6 @@
                     });
 
                     if (!response.ok) {
-                        // Fallback sang Canvas AI Client Engine nếu không có Endpoint trực tiếp
                         return await processLocalCanvasAI(payload);
                     }
                     return await response.json();
@@ -775,13 +739,11 @@
                 }
             }
 
-            // Engine AI Xử lý Song Ngữ & Bối cảnh trực tiếp cho Canvas
             async function processLocalCanvasAI(payload) {
-                await new Promise(r => setTimeout(r, 600)); // Giả lập AI suy nghĩ ngắn
+                await new Promise(r => setTimeout(r, 600));
 
                 const promptText = JSON.stringify(payload);
                 
-                // 1. Phân tích Dịch Context
                 if (promptText.includes('Phân tích cụm từ tiếng Anh') || promptText.includes('Phân tích nhanh cụm từ')) {
                     const phraseMatch = promptText.match(/cụm từ(?: tiếng Anh)? [\\"]*([^\\"]+)[\\"]/i);
                     const sentenceMatch = promptText.match(/câu (?:ngữ cảnh gốc|gốc): [\\"]*([^\\"]+)[\\"]/i);
@@ -789,7 +751,6 @@
                     const phrase = phraseMatch ? phraseMatch[1].trim() : "selected term";
                     const fullSentence = sentenceMatch ? sentenceMatch[1].trim() : phrase;
 
-                    // Xác định loại từ chuẩn ngôn ngữ học
                     let type = "Vocabulary";
                     const lowerPhrase = phrase.toLowerCase();
                     if (lowerPhrase.includes(" ")) {
@@ -807,11 +768,9 @@
                         else type = "Verb";
                     }
 
-                    // Dịch nghĩa sơ bộ ngắn gọn
                     let meaning = "Ý nghĩa chính xác theo bối cảnh bài học";
                     let collocation = `${phrase} (sth/sb)`;
 
-                    // Tạo ví dụ mới B2-C1 chất lượng
                     const b2c1Examples = [
                         `Demonstrating a strong mastery of ${phrase} allows professionals to navigate complex negotiations with confidence.`,
                         `Recent academic studies indicate that incorporating ${phrase} into daily practice significantly enhances overall productivity.`,
@@ -837,12 +796,10 @@
                     };
                 }
 
-                // 2. Xử lý Transcript YouTube / Văn bản
                 let sentencePairs = [];
                 const rawInput = payload.contents?.[0]?.parts?.[0]?.text || "";
 
                 if (rawInput.includes("00:") || rawInput.includes("01:") || rawInput.includes("02:") || /\d{1,2}:\d{2}/.test(rawInput)) {
-                    // Tách theo mốc thời gian YouTube
                     const lines = rawInput.split('\n');
                     let currentTime = "00:00";
                     let currentSec = 0;
@@ -860,7 +817,7 @@
                                     time: currentTime,
                                     seconds: currentSec,
                                     en: text,
-                                    vi: text // Sẽ qua bộ lọc cleanSentencePairs bên dưới
+                                    vi: text
                                 });
                             }
                         } else if (line.trim()) {
@@ -877,7 +834,6 @@
                         }
                     });
                 } else {
-                    // Tách văn bản thường theo câu hoàn chỉnh
                     const rawSentences = rawInput.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 0);
                     sentencePairs = rawSentences.map(s => ({
                         en: s.trim(),
@@ -968,17 +924,12 @@
             let followInterval = null;
             let currentActiveSentenceIndex = -1;
             let currentPlaybackSpeed = 1.00;
-            let markedSentenceIndices = new Set(); // Lưu danh sách các câu đã đánh dấu màu đỏ ửng
+            let markedSentenceIndices = new Set();
             let isVideoPaused = false;
 
             if (toggleSlidersMenuBtn && settingsSlidersPanel) {
-                toggleSlidersMenuBtn.addEventListener('click', () => {
-                    settingsSlidersPanel.classList.toggle('hidden');
-                });
-            }
-
-            if (ytToggleSlidersBtn && settingsSlidersPanel) {
-                ytToggleSlidersBtn.addEventListener('click', () => {
+                toggleSlidersMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     settingsSlidersPanel.classList.toggle('hidden');
                 });
             }
@@ -1001,8 +952,8 @@
 
             function toggleViTextAction() {
                 isViHidden = !isViHidden;
-                const icons = document.querySelectorAll('.toggleViIcon, .ytToggleViIcon');
-                const texts = document.querySelectorAll('.toggleViText, .ytToggleViText');
+                const icons = document.querySelectorAll('.toggleViIcon');
+                const texts = document.querySelectorAll('.toggleViText');
 
                 if (isViHidden) {
                     outputContainer.classList.add('hide-vi');
@@ -1016,7 +967,6 @@
             }
 
             if (toggleViTextBtn) toggleViTextBtn.addEventListener('click', toggleViTextAction);
-            if (ytToggleViTextBtn) ytToggleViTextBtn.addEventListener('click', toggleViTextAction);
 
             if (cardGapSlider && cardGapVal) {
                 cardGapSlider.addEventListener('input', (e) => {
@@ -1084,7 +1034,6 @@
                         for (let i = 0; i < currentSentencePairs.length; i++) {
                             const pair = currentSentencePairs[i];
                             const sec = pair.seconds !== undefined ? pair.seconds : parseTimeToSeconds(pair.time);
-                            // Nhận trễ 0.5s so với thời gian hiện tại của video
                             if (sec <= currentTime - 0.5) {
                                 activeIdx = i;
                             } else {
@@ -1114,12 +1063,9 @@
                         card.classList.add('active-transcript');
                         
                         if (isFollowEnabled && !isManualClick) {
-                            // Tự động lướt hiển thị trọn vẹn 100% thẻ transcript đang phát trong khung Output
                             const containerRect = outputContainer.getBoundingClientRect();
                             const cardRect = card.getBoundingClientRect();
                             const currentScroll = outputContainer.scrollTop;
-                            
-                            // Căn chỉnh sao cho thẻ hiển thị thoải mái đầy đủ không bị đè cạnh
                             const targetScrollTop = cardRect.top - containerRect.top + currentScroll - 12;
                             
                             outputContainer.scrollTo({
@@ -1160,7 +1106,7 @@
                     outputColCard.classList.add('lg:col-span-2');
                     expandInputBtn.classList.remove('hidden');
                     expandInputBtn.classList.add('flex');
-                    showToast('Đã thu gọn nhập liệu để tăng không gian đọc.');
+                    showToast('Đã thu gọn nhập liệu.');
                 });
             }
 
@@ -1188,20 +1134,18 @@
                         transcriptNavControls.classList.add('hidden');
                         transcriptNavControls.classList.remove('flex');
                     }
-                    showToast('Đã làm sạch toàn bộ dữ liệu nhập.');
+                    showToast('Đã xóa toàn bộ dữ liệu nhập.');
                 });
             }
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.tab-btn').forEach(b => {
-                        b.classList.remove('active');
-                        b.classList.remove('text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
+                        b.classList.remove('active', 'text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
                         b.classList.add('text-slate-600', 'dark:text-slate-400');
                     });
-                    btn.classList.add('active');
+                    btn.classList.add('active', 'text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
                     btn.classList.remove('text-slate-600', 'dark:text-slate-400');
-                    btn.classList.add('text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-950/50', 'border', 'border-blue-200', 'dark:border-blue-800');
 
                     const targetTab = btn.getAttribute('data-tab');
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
@@ -1209,12 +1153,20 @@
                     if (targetEl) targetEl.classList.remove('hidden');
 
                     if (targetTab === 'tab-youtube') {
-                        if (topActionButtonsGroup) topActionButtonsGroup.classList.add('hidden');
+                        if (inputColCard) {
+                            inputColCard.classList.remove('h-[580px]');
+                            inputColCard.classList.add('h-auto');
+                        }
                         if (translateBtn) translateBtn.classList.add('hidden');
                     } else {
-                        if (topActionButtonsGroup) topActionButtonsGroup.classList.remove('hidden');
+                        if (inputColCard) {
+                            inputColCard.classList.add('h-[580px]');
+                            inputColCard.classList.remove('h-auto');
+                        }
                         if (translateBtn) translateBtn.classList.remove('hidden');
                     }
+
+                    if (topActionButtonsGroup) topActionButtonsGroup.classList.remove('hidden');
                 });
             });
 
@@ -1321,7 +1273,6 @@
                     let en = (pair.en || '').trim();
                     let vi = (pair.vi || '').trim();
 
-                    // Standardize purely music tags
                     const isPureMusic = /^\[music\]$/i.test(en) || /^\[âm nhạc\]$/i.test(en);
                     if (isPureMusic) {
                         return {
@@ -1331,14 +1282,10 @@
                         };
                     }
 
-                    // Remove inline music/âm nhạc tags if actual spoken text exists
                     en = en.replace(/\[music\]/gi, '').replace(/\[âm nhạc\]/gi, '').replace(/\s+/g, ' ').trim();
                     vi = vi.replace(/\[âm nhạc\]/gi, '').replace(/\[music\]/gi, '').replace(/\s+/g, ' ').trim();
-
-                    // Strip any accidental "Dịch:" or "Dịch : " prefix returned by model
                     vi = vi.replace(/^Dịch\s*:\s*/i, '').trim();
 
-                    // If VI is left empty or echoes EN exactly due to short words, ensure clean fallback or string
                     if (!vi) {
                         vi = en;
                     }
@@ -1356,7 +1303,6 @@
 
                 let payloadParts = [];
                 let systemPrompt = "";
-                let responseSchema = null;
 
                 if (activeTabId === 'tab-text') {
                     const text = inputText ? inputText.value.trim() : '';
@@ -1495,8 +1441,6 @@ Nhiệm vụ:
 
                 if (!sentencePairs || sentencePairs.length === 0) {
                     if (emptyState) outputContainer.appendChild(emptyState);
-                    if (copySpecialDataBtn) copySpecialDataBtn.classList.add('hidden');
-                    if (ytCopySpecialBtn) ytCopySpecialBtn.classList.add('hidden');
                     if (transcriptNavControls) {
                         transcriptNavControls.classList.add('hidden');
                         transcriptNavControls.classList.remove('flex');
@@ -1513,7 +1457,6 @@ Nhiệm vụ:
                         card.classList.add('marked-card');
                     }
 
-                    // Nút Đánh dấu (lá cờ / ghim) nằm ở góc trên bên phải của card, rất tiện bấm mà không rối
                     const bookmarkBtn = document.createElement('button');
                     bookmarkBtn.className = 'absolute top-2 right-2 p-1 rounded-md transition-all text-xs z-10 ' + 
                         (markedSentenceIndices.has(sentenceIndex) ? 'text-red-500 bg-red-100/80 dark:bg-red-950/80' : 'text-slate-300 dark:text-slate-600 hover:text-red-400 opacity-60 hover:opacity-100');
@@ -1588,21 +1531,12 @@ Nhiệm vụ:
                     outputContainer.appendChild(card);
                 });
 
-                if (copySpecialDataBtn) {
-                    copySpecialDataBtn.classList.remove('hidden');
-                    copySpecialDataBtn.classList.add('flex');
-                }
-                if (ytCopySpecialBtn) {
-                    ytCopySpecialBtn.classList.remove('hidden');
-                    ytCopySpecialBtn.classList.add('flex');
-                }
                 if (transcriptNavControls) {
                     transcriptNavControls.classList.remove('hidden');
                     transcriptNavControls.classList.add('flex');
                 }
             }
 
-            // Chuyển đổi trạng thái đánh dấu câu đỏ ửng nhẹ
             function toggleMarkSentence(index, cardEl, btnEl) {
                 if (markedSentenceIndices.has(index)) {
                     markedSentenceIndices.delete(index);
@@ -1619,7 +1553,6 @@ Nhiệm vụ:
                 }
             }
 
-            // Xử lý nút Tạm Dừng / Tiếp Tục Video YouTube
             function updatePlayPauseUI(isPaused) {
                 isVideoPaused = isPaused;
                 if (isPaused) {
@@ -1638,7 +1571,6 @@ Nhiệm vụ:
 
                     try {
                         const playerState = typeof ytPlayer.getPlayerState === 'function' ? ytPlayer.getPlayerState() : -1;
-                        // 1 là PLAYING, 2 là PAUSED
                         if (playerState === 1) {
                             if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
                             updatePlayPauseUI(true);
@@ -1652,7 +1584,6 @@ Nhiệm vụ:
                 });
             }
 
-            // Hàm chuyển câu thoại trước / sau và tua video YouTube tương ứng
             function navigateSentence(direction) {
                 if (!currentSentencePairs || currentSentencePairs.length === 0) return;
                 
@@ -1681,7 +1612,6 @@ Nhiệm vụ:
 
                 highlightActiveSentence(targetIndex, false);
 
-                // Cuộn thẻ thoại mục tiêu vào tầm nhìn của khung Output mượt mà
                 const cards = outputContainer.querySelectorAll('.sentence-card');
                 if (cards[targetIndex]) {
                     const containerRect = outputContainer.getBoundingClientRect();
@@ -1722,7 +1652,6 @@ Nhiệm vụ:
                     initialLeft = rect.left;
                     initialTop = rect.top;
 
-                    // Hủy transform dịch tâm để tính toán toạ độ tuyệt đối pixel chính xác
                     transcriptNavControls.style.transform = 'none';
                     transcriptNavControls.style.right = 'auto';
                     transcriptNavControls.style.bottom = 'auto';
@@ -1740,7 +1669,6 @@ Nhiệm vụ:
                     let newLeft = initialLeft + deltaX;
                     let newTop = initialTop + deltaY;
 
-                    // Giữ trọn vẹn cụm nút bên trong khung nhìn màn hình
                     const rect = transcriptNavControls.getBoundingClientRect();
                     const maxLeft = window.innerWidth - rect.width - 6;
                     const maxTop = window.innerHeight - rect.height - 6;
@@ -1759,7 +1687,6 @@ Nhiệm vụ:
                     dragHandleNav.style.cursor = 'grab';
                 };
 
-                // Kéo bằng chuột
                 dragHandleNav.addEventListener('mousedown', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1777,7 +1704,6 @@ Nhiệm vụ:
                     document.addEventListener('mouseup', onMouseUp);
                 });
 
-                // Kéo bằng chạm cảm ứng (Mobile / Safari iOS / iPad)
                 dragHandleNav.addEventListener('touchstart', (e) => {
                     if (e.touches && e.touches.length > 0) {
                         e.stopPropagation();
@@ -1788,7 +1714,7 @@ Nhiệm vụ:
 
                 dragHandleNav.addEventListener('touchmove', (e) => {
                     if (isDragging && e.touches && e.touches.length > 0) {
-                        e.preventDefault(); // Ngăn cuộn trang web khi đang kéo cụm nút
+                        e.preventDefault();
                         e.stopPropagation();
                         const touch = e.touches[0];
                         onDragMove(touch.clientX, touch.clientY);
@@ -2045,15 +1971,13 @@ Trả về JSON:
             if (clearAllVocabBtn) {
                 clearAllVocabBtn.addEventListener('click', () => {
                     if (vocabLibrary.length === 0) return;
-                    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ thư viện từ vựng?')) {
-                        vocabLibrary = [];
-                        try {
-                            localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
-                        } catch(e){}
-                        updateVocabBadge();
-                        renderVocabList();
-                        showToast('Đã xóa toàn bộ thư viện.');
-                    }
+                    vocabLibrary = [];
+                    try {
+                        localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                    } catch(e){}
+                    updateVocabBadge();
+                    renderVocabList();
+                    showToast('Đã xóa toàn bộ thư viện.');
                 });
             }
 
@@ -2118,7 +2042,6 @@ Trả về JSON:
             }
 
             if (copySpecialDataBtn) copySpecialDataBtn.addEventListener('click', executeDirectCopy);
-            if (ytCopySpecialBtn) ytCopySpecialBtn.addEventListener('click', executeDirectCopy);
 
             function copyToClipboard(str) {
                 const temp = document.createElement('textarea');
@@ -2135,7 +2058,6 @@ Trả về JSON:
             }
 
             if (restoreDataBtn) restoreDataBtn.addEventListener('click', openRestoreModal);
-            if (ytRestoreDataBtn) ytRestoreDataBtn.addEventListener('click', openRestoreModal);
             if (emptyRestoreBtn) emptyRestoreBtn.addEventListener('click', openRestoreModal);
             if (closeRestoreModal) closeRestoreModal.addEventListener('click', () => restoreModal.classList.add('hidden'));
 
@@ -2171,7 +2093,10 @@ Trả về JSON:
                                 const tabYt = getEl('tab-youtube');
                                 if (tabYt) tabYt.classList.remove('hidden');
 
-                                if (topActionButtonsGroup) topActionButtonsGroup.classList.add('hidden');
+                                if (inputColCard) {
+                                    inputColCard.classList.remove('h-[580px]');
+                                    inputColCard.classList.add('h-auto');
+                                }
                                 if (translateBtn) translateBtn.classList.add('hidden');
                             }
 
@@ -2199,15 +2124,12 @@ Trả về JSON:
                             renderResults(cleanSentencePairs(restoredPairs));
                         }
 
-                        // Bổ sung từ vựng mới từ mã khôi phục vào Sổ từ vựng hiện tại (không xóa từ cũ)
                         if (restoredVocab && restoredVocab.length > 0) {
                             const existingIds = new Set(vocabLibrary.map(v => v.id));
-                            let addedCount = 0;
                             restoredVocab.forEach(item => {
                                 if (!existingIds.has(item.id)) {
                                     vocabLibrary.push(item);
                                     existingIds.add(item.id);
-                                    addedCount++;
                                 }
                             });
                             try {
@@ -2217,7 +2139,7 @@ Trả về JSON:
                         }
 
                         if (restoreModal) restoreModal.classList.add('hidden');
-                        showToast('Đã khôi phục thành công! (Nội dung mới đã được cập nhật & bổ sung vào sổ từ vựng).');
+                        showToast('Đã khôi phục thành công!');
                     } catch (e) {
                         showToast('Mã dữ liệu không đúng định dạng khôi phục.', true);
                     }
@@ -2238,6 +2160,29 @@ Trả về JSON:
             }
 
             updateVocabBadge();
+
+            (function() {
+                let lastTouchTime = 0;
+                document.addEventListener('touchend', function(e) {
+                    if (e.target.closest('button, a, input, textarea, select, [role="button"], .word-token, .sentence-card, #dragHandleNav')) {
+                        return;
+                    }
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTouchTime;
+                    if (tapLength < 350 && tapLength > 0) {
+                        e.preventDefault();
+                    }
+                    lastTouchTime = currentTime;
+                }, { passive: false });
+
+                document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+                document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+                document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+                document.addEventListener('dblclick', function(e) {
+                    if (e.target.closest('button, a, input, textarea, select, [role="button"], .word-token')) return;
+                    e.preventDefault();
+                });
+            })();
         });
     </script>
 </body>
