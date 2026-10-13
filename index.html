@@ -417,41 +417,41 @@
 
         <!-- Nút Lướt câu sau -->
         <button id="nextSentenceBtn" class="w-9 sm:w-10 h-12 sm:h-14 rounded-xl bg-slate-50 dark:bg-slate-700/80 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 flex items-center justify-center transition-all duration-150 active:scale-95 group" title="Câu thoại tiếp theo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-y-0.5 transition-transform"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-    </div>
+    <!-- Cụm Điều Khiển Transcript & Video YouTube Cố Định Rìa Phải -->
+    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center select-none hidden pointer-events-none">
+        
+        <!-- Vòng tròn đỏ tĩnh mọc ở trên khi Pause: pointer-events-auto, không animation giật lag -->
+        <div id="pauseRedCircleWrapper" class="h-11 flex items-center justify-center mb-1.5 transition-all opacity-0 scale-90 pointer-events-none">
+            <button id="pauseRedCircleBtn" type="button" class="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white shadow-lg flex items-center justify-center transition-transform cursor-pointer" title="Đánh dấu đỏ câu thoại đang dừng">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            </button>
+        </div>
 
-    <!-- MODAL NHẬP LINK YOUTUBE & TRANSCRIPT BÀI NÓI -->
-    <div id="ytEditModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-4 animate-slide-up-modal my-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">🎥</span>
-                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chỉnh sửa Video & Transcript YouTube</h3>
-                </div>
-                <button id="closeYtEditModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
+        <!-- Khung chứa 3 nút chính + tay cầm: Luôn có kích thước và vị trí cố định tuyệt đối -->
+        <div id="navButtonsContainer" class="bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex flex-col items-center gap-2 pointer-events-auto">
+            <!-- Nút Kéo Thả Di Chuyển (Drag Handle) -->
+            <button id="dragHandleNav" type="button" class="w-9 sm:w-10 h-7 rounded-lg bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600/80 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors shadow-inner" title="Nhấn giữ và kéo để di chuyển vị trí">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/>
+                    <circle cx="15" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                </svg>
+            </button>
 
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">1. Link Video YouTube (không bắt buộc):</label>
-                    <input type="text" id="ytUrlInput" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 font-mono" placeholder="https://youtu.be/...">
-                </div>
+            <!-- Nút Lướt câu trước -->
+            <button id="prevSentenceBtn" class="w-9 sm:w-10 h-12 sm:h-14 rounded-xl bg-slate-50 dark:bg-slate-700/80 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 flex items-center justify-center transition-all duration-150 active:scale-95 group cursor-pointer" title="Câu thoại trước">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-y-0.5 transition-transform"><path d="m18 15-6-6-6 6"/></svg>
+            </button>
+            
+            <!-- Nút Tạm Dừng / Tiếp Tục Video ở giữa -->
+            <button id="playPauseVideoBtn" class="w-9 sm:w-10 h-10 sm:h-11 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white shadow-md flex items-center justify-center transition-all duration-150 cursor-pointer" title="Tạm dừng / Tiếp tục Video">
+                <svg id="playPauseIconPause" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                <svg id="playPauseIconPlay" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="hidden"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            </button>
 
-                <div>
-                    <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">2. Transcript bài nói (không bắt buộc):</label>
-                    <textarea id="ytTranscriptInput" class="w-full h-36 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none font-mono" placeholder="Dán transcript bài nói vào đây...&#10;&#10;00:16 that combined cultural&#10;00:19 values with unique tour&#10;00:22 digital technology&#10;00:24 features promotional aimed at"></textarea>
-                </div>
-            </div>
-
-            <div class="flex gap-2 pt-1">
-                <button id="modalYtTranslateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
-                    <span>Dịch & Nối câu</span>
-                </button>
-            </div>
+            <!-- Nút Lướt câu sau -->
+            <button id="nextSentenceBtn" class="w-9 sm:w-10 h-12 sm:h-14 rounded-xl bg-slate-50 dark:bg-slate-700/80 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 flex items-center justify-center transition-all duration-150 active:scale-95 group cursor-pointer" title="Câu thoại tiếp theo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-y-0.5 transition-transform"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
         </div>
     </div>
 
@@ -658,7 +658,7 @@
             const playPauseIconPause = getEl('playPauseIconPause');
             const playPauseIconPlay = getEl('playPauseIconPlay');
             const pauseRedCircleBtn = getEl('pauseRedCircleBtn');
-
+            const pauseRedCircleWrapper = getEl('pauseRedCircleWrapper');
             const openYtEditModalBtn = getEl('openYtEditModalBtn');
             const ytEditModal = getEl('ytEditModal');
             const closeYtEditModal = getEl('closeYtEditModal');
@@ -1572,16 +1572,16 @@ Nhiệm vụ:
                 if (isPaused) {
                     if (playPauseIconPause) playPauseIconPause.classList.add('hidden');
                     if (playPauseIconPlay) playPauseIconPlay.classList.remove('hidden');
-                    if (pauseRedCircleBtn) {
-                        pauseRedCircleBtn.classList.remove('hidden');
-                        pauseRedCircleBtn.classList.add('flex');
+                    if (pauseRedCircleWrapper) {
+                        pauseRedCircleWrapper.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+                        pauseRedCircleWrapper.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
                     }
                 } else {
                     if (playPauseIconPlay) playPauseIconPlay.classList.add('hidden');
                     if (playPauseIconPause) playPauseIconPause.classList.remove('hidden');
-                    if (pauseRedCircleBtn) {
-                        pauseRedCircleBtn.classList.add('hidden');
-                        pauseRedCircleBtn.classList.remove('flex');
+                    if (pauseRedCircleWrapper) {
+                        pauseRedCircleWrapper.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                        pauseRedCircleWrapper.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
                     }
                 }
             }
@@ -1629,26 +1629,6 @@ Nhiệm vụ:
                     } catch(err) {
                         updatePlayPauseUI(!isVideoPaused);
                     }
-                });
-            }
-
-            if (playPauseVideoBtn) {
-                playPauseVideoBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (!ytPlayer) return;
-
-                    try {
-                        const playerState = typeof ytPlayer.getPlayerState === 'function' ? ytPlayer.getPlayerState() : -1;
-                        if (playerState === 1) {
-                            if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
-                            updatePlayPauseUI(true);
-                            showToast('Đã tạm dừng video.');
-                        } else {
-                            if (typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
-                            updatePlayPauseUI(false);
-                            showToast('Đang phát video.');
-                        }
-                    } catch(err) {}
                 });
             }
 
