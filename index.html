@@ -391,6 +391,11 @@
     </main>
 
     <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex flex-col items-center gap-2 hidden select-none">
+        <!-- Vòng tròn màu đỏ xuất hiện ngay bên trên thanh điều khiển khi video dừng -->
+        <button id="pauseRedCircleBtn" type="button" class="w-8 h-8 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-90 text-white shadow-lg ring-2 ring-rose-400/80 animate-bounce flex items-center justify-center transition-all hidden" title="Đánh dấu đỏ câu thoại đang dừng">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </button>
+
         <!-- Nút Kéo Thả Di Chuyển (Drag Handle) -->
         <button id="dragHandleNav" type="button" class="w-9 sm:w-10 h-7 rounded-lg bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-600/80 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors shadow-inner" title="Nhấn giữ và kéo để di chuyển vị trí">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -652,7 +657,7 @@
             const playPauseVideoBtn = getEl('playPauseVideoBtn');
             const playPauseIconPause = getEl('playPauseIconPause');
             const playPauseIconPlay = getEl('playPauseIconPlay');
-            const cookieBookmarkBtn = getEl('cookieBookmarkBtn');
+            const pauseRedCircleBtn = getEl('pauseRedCircleBtn');
 
             const openYtEditModalBtn = getEl('openYtEditModalBtn');
             const ytEditModal = getEl('ytEditModal');
@@ -1567,38 +1572,40 @@ Nhiệm vụ:
                 if (isPaused) {
                     if (playPauseIconPause) playPauseIconPause.classList.add('hidden');
                     if (playPauseIconPlay) playPauseIconPlay.classList.remove('hidden');
-                    if (cookieBookmarkBtn) {
-                        cookieBookmarkBtn.classList.remove('hidden');
-                        cookieBookmarkBtn.classList.add('flex');
+                    if (pauseRedCircleBtn) {
+                        pauseRedCircleBtn.classList.remove('hidden');
+                        pauseRedCircleBtn.classList.add('flex');
                     }
                 } else {
                     if (playPauseIconPlay) playPauseIconPlay.classList.add('hidden');
                     if (playPauseIconPause) playPauseIconPause.classList.remove('hidden');
-                    if (cookieBookmarkBtn) {
-                        cookieBookmarkBtn.classList.add('hidden');
-                        cookieBookmarkBtn.classList.remove('flex');
+                    if (pauseRedCircleBtn) {
+                        pauseRedCircleBtn.classList.add('hidden');
+                        pauseRedCircleBtn.classList.remove('flex');
                     }
                 }
             }
 
-            if (cookieBookmarkBtn) {
-                cookieBookmarkBtn.addEventListener('click', (e) => {
+            if (pauseRedCircleBtn) {
+                pauseRedCircleBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (currentActiveSentenceIndex === -1 || !outputContainer) {
-                        // Nếu chưa có câu nào kích hoạt thì lấy câu đầu tiên
-                        if (currentSentencePairs && currentSentencePairs.length > 0) {
-                            currentActiveSentenceIndex = 0;
-                        } else {
-                            return showToast('Chưa có câu thoại nào để đánh dấu!', true);
-                        }
+                    if (!outputContainer) return;
+
+                    let targetIdx = currentActiveSentenceIndex;
+                    if (targetIdx === -1) {
+                        targetIdx = 0;
+                        highlightActiveSentence(0, false);
                     }
+
                     const cards = outputContainer.querySelectorAll('.sentence-card');
-                    const currentCard = cards[currentActiveSentenceIndex];
-                    if (currentCard) {
-                        const bookmarkBtn = currentCard.querySelector('button');
+                    const targetCard = cards[targetIdx];
+                    if (targetCard) {
+                        const bookmarkBtn = targetCard.querySelector('button');
                         if (bookmarkBtn) {
-                            toggleMarkSentence(currentActiveSentenceIndex, currentCard, bookmarkBtn);
+                            toggleMarkSentence(targetIdx, targetCard, bookmarkBtn);
                         }
+                    } else {
+                        showToast('Chưa có câu thoại để đánh dấu!', true);
                     }
                 });
             }
@@ -1620,7 +1627,6 @@ Nhiệm vụ:
                             showToast('Đang phát video.');
                         }
                     } catch(err) {
-                        // Fallback toggle
                         updatePlayPauseUI(!isVideoPaused);
                     }
                 });
