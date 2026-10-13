@@ -652,6 +652,7 @@
             const playPauseVideoBtn = getEl('playPauseVideoBtn');
             const playPauseIconPause = getEl('playPauseIconPause');
             const playPauseIconPlay = getEl('playPauseIconPlay');
+            const cookieBookmarkBtn = getEl('cookieBookmarkBtn');
 
             const openYtEditModalBtn = getEl('openYtEditModalBtn');
             const ytEditModal = getEl('ytEditModal');
@@ -1558,10 +1559,29 @@ Nhiệm vụ:
                 if (isPaused) {
                     if (playPauseIconPause) playPauseIconPause.classList.add('hidden');
                     if (playPauseIconPlay) playPauseIconPlay.classList.remove('hidden');
+                    if (cookieBookmarkBtn) cookieBookmarkBtn.classList.remove('hidden');
                 } else {
                     if (playPauseIconPlay) playPauseIconPlay.classList.add('hidden');
                     if (playPauseIconPause) playPauseIconPause.classList.remove('hidden');
+                    if (cookieBookmarkBtn) cookieBookmarkBtn.classList.add('hidden');
                 }
+            }
+
+            if (cookieBookmarkBtn) {
+                cookieBookmarkBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (currentActiveSentenceIndex === -1 || !outputContainer) {
+                        return showToast('Chưa chọn câu thoại nào để đánh dấu!', true);
+                    }
+                    const cards = outputContainer.querySelectorAll('.sentence-card');
+                    const currentCard = cards[currentActiveSentenceIndex];
+                    if (currentCard) {
+                        const bookmarkBtn = currentCard.querySelector('button');
+                        if (bookmarkBtn) {
+                            toggleMarkSentence(currentActiveSentenceIndex, currentCard, bookmarkBtn);
+                        }
+                    }
+                });
             }
 
             if (playPauseVideoBtn) {
