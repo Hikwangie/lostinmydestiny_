@@ -391,9 +391,9 @@
     </main>
 
     <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 backdrop-blur-md flex flex-col items-center gap-2 hidden select-none">
-        <!-- Vòng tròn màu đỏ xuất hiện ngay bên trên thanh điều khiển khi video dừng -->
-        <button id="pauseRedCircleBtn" type="button" class="w-8 h-8 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-90 text-white shadow-lg ring-2 ring-rose-400/80 animate-bounce flex items-center justify-center transition-all hidden" title="Đánh dấu đỏ câu thoại đang dừng">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        <!-- Vòng tròn màu đỏ nổi lên phía trên mà không đẩy xê dịch vị trí 3 nút bên dưới -->
+        <button id="pauseRedCircleBtn" type="button" class="absolute -top-12 left-1/2 -translate-x-1/2 w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-90 text-white shadow-xl ring-2 ring-white/80 dark:ring-slate-900/80 shadow-rose-600/40 flex items-center justify-center transition-all hidden z-50" title="Đánh dấu đỏ câu thoại đang dừng">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
         </button>
 
         <!-- Nút Kéo Thả Di Chuyển (Drag Handle) -->
