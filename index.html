@@ -895,6 +895,14 @@
                                     if (currentPlaybackSpeed) {
                                         try { event.target.setPlaybackRate(parseFloat(currentPlaybackSpeed)); } catch(e){}
                                     }
+                                },
+                                'onStateChange': (event) => {
+                                    // 1: PLAYING, 2: PAUSED, 0: ENDED
+                                    if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                                        updatePlayPauseUI(true);
+                                    } else if (event.data === YT.PlayerState.PLAYING) {
+                                        updatePlayPauseUI(false);
+                                    }
                                 }
                             }
                         });
@@ -1559,11 +1567,17 @@ Nhiệm vụ:
                 if (isPaused) {
                     if (playPauseIconPause) playPauseIconPause.classList.add('hidden');
                     if (playPauseIconPlay) playPauseIconPlay.classList.remove('hidden');
-                    if (cookieBookmarkBtn) cookieBookmarkBtn.classList.remove('hidden');
+                    if (cookieBookmarkBtn) {
+                        cookieBookmarkBtn.classList.remove('hidden');
+                        cookieBookmarkBtn.classList.add('flex');
+                    }
                 } else {
                     if (playPauseIconPlay) playPauseIconPlay.classList.add('hidden');
                     if (playPauseIconPause) playPauseIconPause.classList.remove('hidden');
-                    if (cookieBookmarkBtn) cookieBookmarkBtn.classList.add('hidden');
+                    if (cookieBookmarkBtn) {
+                        cookieBookmarkBtn.classList.add('hidden');
+                        cookieBookmarkBtn.classList.remove('flex');
+                    }
                 }
             }
 
@@ -1571,7 +1585,12 @@ Nhiệm vụ:
                 cookieBookmarkBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (currentActiveSentenceIndex === -1 || !outputContainer) {
-                        return showToast('Chưa chọn câu thoại nào để đánh dấu!', true);
+                        // Nếu chưa có câu nào kích hoạt thì lấy câu đầu tiên
+                        if (currentSentencePairs && currentSentencePairs.length > 0) {
+                            currentActiveSentenceIndex = 0;
+                        } else {
+                            return showToast('Chưa có câu thoại nào để đánh dấu!', true);
+                        }
                     }
                     const cards = outputContainer.querySelectorAll('.sentence-card');
                     const currentCard = cards[currentActiveSentenceIndex];
@@ -1580,6 +1599,29 @@ Nhiệm vụ:
                         if (bookmarkBtn) {
                             toggleMarkSentence(currentActiveSentenceIndex, currentCard, bookmarkBtn);
                         }
+                    }
+                });
+            }
+
+            if (playPauseVideoBtn) {
+                playPauseVideoBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (!ytPlayer) return;
+
+                    try {
+                        const playerState = typeof ytPlayer.getPlayerState === 'function' ? ytPlayer.getPlayerState() : -1;
+                        if (playerState === 1) {
+                            if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
+                            updatePlayPauseUI(true);
+                            showToast('Đã tạm dừng video.');
+                        } else {
+                            if (typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
+                            updatePlayPauseUI(false);
+                            showToast('Đang phát video.');
+                        }
+                    } catch(err) {
+                        // Fallback toggle
+                        updatePlayPauseUI(!isVideoPaused);
                     }
                 });
             }
