@@ -195,6 +195,11 @@
             -webkit-user-select: none !important;
             user-select: none !important;
         }
+
+        /* Chặn tuyệt đối trình duyệt cuộn nền khi ấn giữ kéo thanh điều khiển */
+        #dragHandleNav, #dragHandleNav * {
+            touch-action: none !important;
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 font-sans pb-24 transition-colors duration-75">
@@ -730,43 +735,56 @@
             let followInterval = null;
             let currentActiveSentenceIndex = -1;
             let currentPlaybackSpeed = 1.00;
+            let navRotationAngle = 0;
 
-            function updateNavOrientation(horizontal) {
-                isNavHorizontal = horizontal;
+            function updateNavRotation(angle) {
+                navRotationAngle = angle % 360;
                 if (!transcriptNavControls) return;
 
-                if (horizontal) {
-                    transcriptNavControls.classList.remove('flex-col');
-                    transcriptNavControls.classList.add('flex-row');
+                if (rotateIcon) {
+                    rotateIcon.style.transform = `rotate(${navRotationAngle}deg)`;
+                }
+
+                // Xóa các class hướng cũ
+                transcriptNavControls.classList.remove('flex-col', 'flex-col-reverse', 'flex-row', 'flex-row-reverse');
+                if (navHeaderTools) {
+                    navHeaderTools.classList.remove('w-full', 'flex-col', 'h-full', 'border-r', 'border-l', 'border-slate-700/60', 'pr-1.5', 'pl-1.5', 'mr-0.5', 'ml-0.5');
+                }
+
+                const isHorizontal = (navRotationAngle === 90 || navRotationAngle === 270);
+
+                if (!isHorizontal) {
+                    // Hướng dọc: 0 độ (xuôi) hoặc 180 độ (ngược)
+                    transcriptNavControls.classList.add(navRotationAngle === 0 ? 'flex-col' : 'flex-col-reverse');
                     if (navHeaderTools) {
-                        navHeaderTools.classList.remove('w-full');
-                        navHeaderTools.classList.add('flex-col', 'h-full', 'border-r', 'border-slate-700/60', 'pr-1.5', 'mr-0.5');
-                    }
-                    if (prevNavIcon) prevNavIcon.innerHTML = `<path d="m15 18-6-6 6-6"/>`;
-                    if (nextNavIcon) nextNavIcon.innerHTML = `<path d="m9 18 6-6-6-6"/>`;
-                    if (prevSentenceNavBtn) prevSentenceNavBtn.className = 'w-11 sm:w-12 h-9 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
-                    if (nextSentenceNavBtn) nextSentenceNavBtn.className = 'w-11 sm:w-12 h-9 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
-                    if (rotateIcon) rotateIcon.style.transform = 'rotate(90deg)';
-                } else {
-                    transcriptNavControls.classList.remove('flex-row');
-                    transcriptNavControls.classList.add('flex-col');
-                    if (navHeaderTools) {
-                        navHeaderTools.classList.remove('flex-col', 'h-full', 'border-r', 'border-slate-700/60', 'pr-1.5', 'mr-0.5');
                         navHeaderTools.classList.add('w-full');
                     }
                     if (prevNavIcon) prevNavIcon.innerHTML = `<path d="m18 15-6-6-6 6"/>`;
                     if (nextNavIcon) nextNavIcon.innerHTML = `<path d="m6 9 6 6 6-6"/>`;
                     if (prevSentenceNavBtn) prevSentenceNavBtn.className = 'w-9 sm:w-10 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
                     if (nextSentenceNavBtn) nextSentenceNavBtn.className = 'w-9 sm:w-10 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
-                    if (rotateIcon) rotateIcon.style.transform = 'rotate(0deg)';
+                } else {
+                    // Hướng ngang: 90 độ (xuôi) hoặc 270 độ (ngược)
+                    transcriptNavControls.classList.add(navRotationAngle === 90 ? 'flex-row' : 'flex-row-reverse');
+                    if (navHeaderTools) {
+                        if (navRotationAngle === 90) {
+                            navHeaderTools.classList.add('flex-col', 'h-full', 'border-r', 'border-slate-700/60', 'pr-1.5', 'mr-0.5');
+                        } else {
+                            navHeaderTools.classList.add('flex-col', 'h-full', 'border-l', 'border-slate-700/60', 'pl-1.5', 'ml-0.5');
+                        }
+                    }
+                    if (prevNavIcon) prevNavIcon.innerHTML = `<path d="m15 18-6-6 6-6"/>`;
+                    if (nextNavIcon) nextNavIcon.innerHTML = `<path d="m9 18 6-6-6-6"/>`;
+                    if (prevSentenceNavBtn) prevSentenceNavBtn.className = 'w-11 sm:w-12 h-9 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
+                    if (nextSentenceNavBtn) nextSentenceNavBtn.className = 'w-11 sm:w-12 h-9 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
                 }
             }
 
             if (rotateNavBtn) {
                 rotateNavBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    updateNavOrientation(!isNavHorizontal);
-                    showToast(isNavHorizontal ? 'Đã xoay thanh điều khiển Ngang' : 'Đã xoay thanh điều khiển Dọc');
+                    updateNavRotation(navRotationAngle + 90);
+                    showToast(`Đã xoay thanh điều khiển (${navRotationAngle}°)`);
                 });
             }
 
@@ -873,77 +891,108 @@
                 let startClientX = 0, startClientY = 0;
                 let initialLeft = 0, initialTop = 0;
                 let currentLeft = 0, currentTop = 0;
-                let animationFrameId = null;
 
-                const renderPosition = () => {
-                    if (!isDragging) return;
-                    transcriptNavControls.style.left = `${currentLeft}px`;
-                    transcriptNavControls.style.top = `${currentTop}px`;
-                    animationFrameId = null;
-                };
-
-                const onPointerDown = (e) => {
+                const onDragStart = (clientX, clientY, pointerId) => {
                     isDragging = true;
-                    try { dragHandleNav.setPointerCapture(e.pointerId); } catch(err) {}
+                    if (pointerId !== undefined) {
+                        try { dragHandleNav.setPointerCapture(pointerId); } catch(err) {}
+                    }
 
                     const rect = transcriptNavControls.getBoundingClientRect();
+                    // Tắt transition-all khi đang kéo để không bị trễ/khựng
+                    transcriptNavControls.classList.remove('transition-all');
+                    transcriptNavControls.style.transition = 'none';
                     transcriptNavControls.style.right = 'auto';
                     transcriptNavControls.style.bottom = 'auto';
                     transcriptNavControls.style.transform = 'none';
+                    transcriptNavControls.style.left = `${rect.left}px`;
+                    transcriptNavControls.style.top = `${rect.top}px`;
 
                     initialLeft = rect.left;
                     initialTop = rect.top;
                     currentLeft = rect.left;
                     currentTop = rect.top;
 
-                    startClientX = e.clientX;
-                    startClientY = e.clientY;
+                    startClientX = clientX;
+                    startClientY = clientY;
 
                     transcriptNavControls.classList.add('shadow-indigo-500/20', 'border-blue-500/80');
                     document.body.style.userSelect = 'none';
-                    e.preventDefault();
                 };
 
-                const onPointerMove = (e) => {
+                const onDragMove = (clientX, clientY) => {
                     if (!isDragging) return;
 
-                    const dx = e.clientX - startClientX;
-                    const dy = e.clientY - startClientY;
+                    const dx = clientX - startClientX;
+                    const dy = clientY - startClientY;
 
                     const navWidth = transcriptNavControls.offsetWidth;
                     const navHeight = transcriptNavControls.offsetHeight;
-                    const maxLeft = Math.max(8, window.innerWidth - navWidth - 8);
-                    const maxTop = Math.max(8, window.innerHeight - navHeight - 8);
+                    const maxLeft = Math.max(4, window.innerWidth - navWidth - 4);
+                    const maxTop = Math.max(4, window.innerHeight - navHeight - 4);
 
-                    currentLeft = Math.max(8, Math.min(initialLeft + dx, maxLeft));
-                    currentTop = Math.max(8, Math.min(initialTop + dy, maxTop));
+                    currentLeft = Math.max(4, Math.min(initialLeft + dx, maxLeft));
+                    currentTop = Math.max(4, Math.min(initialTop + dy, maxTop));
 
-                    if (!animationFrameId) {
-                        animationFrameId = requestAnimationFrame(renderPosition);
-                    }
-                    e.preventDefault();
+                    // Dùng translate3d để GPU xử lý tức thì không bị khựng
+                    const offsetX = currentLeft - initialLeft;
+                    const offsetY = currentTop - initialTop;
+                    transcriptNavControls.style.transform = `translate3d(${offsetX}px, ${offsetY}px, 0)`;
                 };
 
-                const onPointerUp = (e) => {
+                const onDragEnd = (pointerId) => {
                     if (!isDragging) return;
                     isDragging = false;
-                    try { dragHandleNav.releasePointerCapture(e.pointerId); } catch(err) {}
-
-                    if (animationFrameId) {
-                        cancelAnimationFrame(animationFrameId);
-                        animationFrameId = null;
+                    if (pointerId !== undefined) {
+                        try { dragHandleNav.releasePointerCapture(pointerId); } catch(err) {}
                     }
+
+                    transcriptNavControls.style.transform = 'none';
                     transcriptNavControls.style.left = `${currentLeft}px`;
                     transcriptNavControls.style.top = `${currentTop}px`;
+                    transcriptNavControls.style.transition = '';
 
                     transcriptNavControls.classList.remove('shadow-indigo-500/20', 'border-blue-500/80');
                     document.body.style.userSelect = '';
                 };
 
-                dragHandleNav.addEventListener('pointerdown', onPointerDown);
-                window.addEventListener('pointermove', onPointerMove, { passive: false });
-                window.addEventListener('pointerup', onPointerUp);
-                window.addEventListener('pointercancel', onPointerUp);
+                // Hỗ trợ chuẩn Pointer Events
+                dragHandleNav.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    onDragStart(e.clientX, e.clientY, e.pointerId);
+                });
+
+                window.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    onDragMove(e.clientX, e.clientY);
+                }, { passive: false });
+
+                window.addEventListener('pointerup', (e) => onDragEnd(e.pointerId));
+                window.addEventListener('pointercancel', (e) => onDragEnd(e.pointerId));
+
+                // Khóa chặt sự kiện Touch trên iOS/iPadOS để không bao giờ bị trượt sang kéo nền đằng sau
+                dragHandleNav.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    if (e.touches.length === 1) {
+                        e.preventDefault();
+                        const touch = e.touches[0];
+                        if (!isDragging) onDragStart(touch.clientX, touch.clientY);
+                    }
+                }, { passive: false });
+
+                window.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    if (e.touches.length > 0) {
+                        onDragMove(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: false });
+
+                window.addEventListener('touchend', () => {
+                    if (isDragging) onDragEnd();
+                });
             }
 
             if (toggleSlidersMenuBtn && settingsSlidersPanel) {
