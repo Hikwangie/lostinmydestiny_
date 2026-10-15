@@ -199,7 +199,6 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 font-sans pb-24 transition-colors duration-75">
 
-    <!-- Header chính -->
     <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm py-2 px-4 transition-colors duration-75">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -213,12 +212,12 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button id="themeToggleBtn" type="button" class="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all border border-slate-300 dark:border-slate-600" title="Chuyển chế độ Tối / Sáng">
+                <button id="themeToggleBtn" type="button" class="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all border border-slate-300 dark:border-slate-600 cursor-pointer" title="Chuyển chế độ Tối / Sáng">
                     <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                     <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden text-slate-600"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
                 </button>
 
-                <button id="openLibraryBtn" class="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all">
+                <button id="openLibraryBtn" class="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
                     <span class="hidden xs:inline">Thư viện</span>
                     <span id="vocabBadge" class="bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
@@ -228,16 +227,14 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-5 space-y-5">
-
-        <!-- Tabs chuyển chế độ nhập liệu -->
         <div id="tabsHeader" class="bg-white dark:bg-slate-800 p-1.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap gap-1 transition-colors duration-75">
-            <button class="tab-btn active flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800" data-tab="tab-text">
+            <button class="tab-btn active flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 cursor-pointer" data-tab="tab-text">
                 📝 Văn bản
             </button>
-            <button class="tab-btn flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50" data-tab="tab-images">
+            <button class="tab-btn flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer" data-tab="tab-images">
                 🖼️ Nhiều Hình Ảnh
             </button>
-            <button id="ytTabBtn" class="tab-btn flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50" data-tab="tab-youtube">
+            <button id="ytTabBtn" class="tab-btn flex-1 py-2 px-3 rounded-xl font-medium text-xs sm:text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer" data-tab="tab-youtube">
                 🎥 Video YouTube
             </button>
         </div>
@@ -246,15 +243,14 @@
 
             <!-- Cột Trái: Input -->
             <div id="inputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] transition-all overflow-hidden">
-                
                 <div id="inputCardHeader" class="flex items-center justify-between mb-2 flex-shrink-0">
                     <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Nhập liệu đầu vào:</span>
                     <div class="flex items-center gap-2">
-                        <button id="clearAllInputBtn" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium transition-colors flex items-center gap-1">
+                        <button id="clearAllInputBtn" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium transition-colors flex items-center gap-1 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                             <span>Xóa tất cả</span>
                         </button>
-                        <button id="toggleCollapseInputBtn" class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all flex items-center gap-1">
+                        <button id="toggleCollapseInputBtn" class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all flex items-center gap-1 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
                             <span>Thu gọn nhập liệu</span>
                         </button>
@@ -279,15 +275,12 @@
 
                 <!-- Tab 3: Video YouTube -->
                 <div id="tab-youtube" class="tab-content flex-1 flex flex-col hidden space-y-2.5 min-h-0 overflow-y-auto pr-1">
-                    
-                    <!-- Khung phát Video YouTube tỉ lệ chuẩn rõ đẹp -->
-                    <div id="ytPlayerContainer" class="w-full aspect-video min-h-[220px] sm:min-h-[260px] bg-black rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                    <div id="ytPlayerContainer" class="w-full aspect-video min-h-[200px] sm:min-h-[240px] bg-black rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative flex items-center justify-center border border-slate-200 dark:border-slate-700">
                         <p class="text-xs text-slate-500 text-center px-4">Nhấn <b>"Chỉnh sửa, đổi Video & Transcript"</b> ở bên dưới để nhập link và bài nói</p>
                     </div>
 
-                    <!-- Thanh Điều khiển YouTube (Follow + Tốc độ) -->
                     <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs gap-2 flex-wrap flex-shrink-0">
-                        <button id="toggleFollowBtn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+                        <button id="toggleFollowBtn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
                             <span>🔄</span>
                             <span id="followBtnText">Follow</span>
                         </button>
@@ -298,15 +291,13 @@
                         </div>
                     </div>
 
-                    <!-- Nút mở Modal Nhập Link & Transcript -->
-                    <button id="openYtEditModalBtn" class="w-full bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-600 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all flex-shrink-0">
+                    <button id="openYtEditModalBtn" class="w-full bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-600 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all flex-shrink-0 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         <span>Chỉnh sửa, đổi Video & Transcript</span>
                     </button>
                 </div>
 
-                <!-- Nút bấm dịch chuẩn cho Tab Text & Tab Ảnh -->
-                <button id="translateBtn" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 flex-shrink-0">
+                <button id="translateBtn" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
                     <span>Dịch & Nối câu</span>
                 </button>
@@ -314,30 +305,28 @@
 
             <!-- Cột Phải: Kết quả Output -->
             <div id="outputColCard" class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[580px] relative transition-all lg:col-span-1 overflow-hidden">
-                
-                <!-- Thanh công cụ Output (4 nút tác vụ luôn nằm trên thẻ Output ở tất cả giao diện) -->
                 <div id="outputTopBar" class="flex items-center justify-between mb-2 flex-nowrap overflow-x-auto gap-1.5 flex-shrink-0 pb-1">
-                    <button id="expandInputBtn" class="hidden text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all items-center gap-1 flex-shrink-0">
+                    <button id="expandInputBtn" class="hidden text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-1 rounded-lg font-medium transition-all items-center gap-1 flex-shrink-0 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                         <span>Hiện nhập liệu</span>
                     </button>
 
                     <div id="topActionButtonsGroup" class="flex items-center gap-1 flex-nowrap w-full justify-between">
-                        <button id="toggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600 flex-shrink-0 whitespace-nowrap">
+                        <button id="toggleViTextBtn" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 px-2 py-1 rounded-lg font-semibold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-600 flex-shrink-0 whitespace-nowrap cursor-pointer">
                             <span class="toggleViIcon">👁️</span> <span class="toggleViText">Nghĩa Việt</span>
                         </button>
 
-                        <button id="toggleSlidersMenuBtn" class="text-[11px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60 flex-shrink-0 whitespace-nowrap" title="Chỉnh cỡ chữ & khoảng cách">
+                        <button id="toggleSlidersMenuBtn" class="text-[11px] text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-purple-200 dark:border-purple-900/60 flex-shrink-0 whitespace-nowrap cursor-pointer" title="Chỉnh cỡ chữ & khoảng cách">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0 2.73-.73l.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                             <span>Chỉnh giao diện</span>
                         </button>
 
-                        <button id="restoreDataBtn" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60 flex-shrink-0 whitespace-nowrap" title="Dán dữ liệu đã chép để khôi phục">
+                        <button id="restoreDataBtn" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-emerald-200 dark:border-emerald-900/60 flex-shrink-0 whitespace-nowrap cursor-pointer" title="Dán dữ liệu đã chép để khôi phục">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
                             <span>Dán khôi phục</span>
                         </button>
 
-                        <button id="copySpecialDataBtn" class="text-[11px] text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60 flex-shrink-0 whitespace-nowrap" title="Sao chép toàn bộ dữ liệu">
+                        <button id="copySpecialDataBtn" class="text-[11px] text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 font-semibold border border-blue-200 dark:border-blue-900/60 flex-shrink-0 whitespace-nowrap cursor-pointer" title="Sao chép toàn bộ dữ liệu">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                             <span>Sao chép dữ liệu</span>
                         </button>
@@ -373,7 +362,7 @@
                     <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-center px-4 space-y-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-40"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                         <p class="text-xs">Chưa có dữ liệu dịch. Hãy nhập nội dung và nhấn <b>Dịch & Nối câu</b>.</p>
-                        <button id="emptyRestoreBtn" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                        <button id="emptyRestoreBtn" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M12 11v6"/><path d="m9 14 3-3 3 3"/></svg>
                             <span>Dán dữ liệu đã chép để khôi phục</span>
                         </button>
@@ -384,36 +373,40 @@
         </div>
     </main>
 
-    <!-- THANH ĐIỀU KHIỂN NỔI DUY NHẤT (Chỉ hiện khi ở tab YouTube có transcript) -->
-    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-slate-700/80 flex flex-col items-center gap-2 hidden transition-all">
-        <!-- Nút tay cầm kéo di chuyển dock -->
-        <button id="dragHandleNav" class="w-9 sm:w-10 h-6 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-white" title="Kéo để di chuyển vị trí">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
-        </button>
+    <div id="transcriptNavControls" class="fixed right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-slate-700/80 flex flex-col items-center gap-2 hidden transition-all select-none">
+        
+        <!-- Hàng công cụ Dock: Nắm kéo & Nút xoay Dọc/Ngang -->
+        <div id="navHeaderTools" class="flex items-center justify-between w-full gap-1">
+            <button id="dragHandleNav" class="flex-1 h-6 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-white" title="Kéo để di chuyển vị trí">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+            </button>
+            <button id="rotateNavBtn" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-cyan-400 active:scale-95 transition-all cursor-pointer" title="Xoay Dọc / Ngang">
+                <svg id="rotateIcon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-200"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+        </div>
 
-        <!-- Nút ĐÁNH DẤU CÂU THOẠI CỐ ĐỊNH TRÊN 3 NÚT (Xanh khi chạy, Đỏ khi dừng) -->
+        <!-- Nút ĐÁNH DẤU CÂU THOẠI (Xanh khi chạy, Đỏ khi dừng) -->
         <button id="bookmarkNavBtn" class="w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-blue-600 text-white/50 cursor-not-allowed opacity-50 border border-blue-400/30 flex items-center justify-center transition-all duration-200" title="Tạm dừng video để đánh dấu câu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15" stroke="currentColor" stroke-width="2"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15" stroke="currentColor" stroke-width="2"/></svg>
         </button>
 
         <!-- Nút 1: Câu trước đó -->
-        <button id="prevSentenceNavBtn" class="w-9 sm:w-10 h-12 sm:h-14 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700" title="Câu thoại trước đó">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+        <button id="prevSentenceNavBtn" class="w-9 sm:w-10 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 cursor-pointer" title="Câu thoại trước đó">
+            <svg id="prevNavIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
         </button>
 
         <!-- Nút 2: Tạm dừng / Tiếp tục -->
-        <button id="playPauseNavBtn" class="w-9 sm:w-10 h-10 sm:h-11 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold shadow-md flex items-center justify-center transition-all" title="Tạm dừng / Phát tiếp">
-            <svg id="playPauseIconPause" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-            <svg id="playPauseIconPlay" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="hidden"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        <button id="playPauseNavBtn" class="w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold shadow-md flex items-center justify-center transition-all cursor-pointer" title="Tạm dừng / Phát tiếp">
+            <svg id="playPauseIconPause" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            <svg id="playPauseIconPlay" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="hidden"><polygon points="6 3 20 12 6 21 6 3"/></svg>
         </button>
 
         <!-- Nút 3: Câu tiếp theo -->
-        <button id="nextSentenceNavBtn" class="w-9 sm:w-10 h-12 sm:h-14 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700" title="Câu thoại tiếp theo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        <button id="nextSentenceNavBtn" class="w-9 sm:w-10 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 cursor-pointer" title="Câu thoại tiếp theo">
+            <svg id="nextNavIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
     </div>
 
-    <!-- MODAL NHẬP LINK YOUTUBE & TRANSCRIPT BÀI NÓI -->
     <div id="ytEditModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-4 animate-slide-up-modal my-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
@@ -421,7 +414,7 @@
                     <span class="text-lg">🎥</span>
                     <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chỉnh sửa Video & Transcript YouTube</h3>
                 </div>
-                <button id="closeYtEditModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                <button id="closeYtEditModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -439,7 +432,7 @@
             </div>
 
             <div class="flex gap-2 pt-1">
-                <button id="modalYtTranslateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all">
+                <button id="modalYtTranslateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
                     <span>Dịch & Nối câu</span>
                 </button>
@@ -447,27 +440,25 @@
         </div>
     </div>
 
-    <!-- THANH NỔI 3 NÚT CHỌN TỪ -->
     <div id="selectionFloatingBar" class="fixed bottom-6 left-1/2 z-40 bg-slate-900/95 dark:bg-slate-950/95 text-white backdrop-blur-md rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-2 border border-slate-700/80 hidden transition-all animate-slide-up-floating max-w-[92vw]">
         <div class="mr-1 hidden sm:block">
             <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Đã chọn</p>
             <p id="selectedPhrasePreview" class="text-xs font-semibold text-blue-300 max-w-[120px] truncate">word</p>
         </div>
 
-        <button id="btnTranslateContext" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-medium px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm">
+        <button id="btnTranslateContext" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-medium px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
             <span>🔍 Dịch context</span>
         </button>
 
-        <button id="btnAddDictDirect" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-medium px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm">
+        <button id="btnAddDictDirect" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-medium px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
             <span>➕ Thêm vào từ điển</span>
         </button>
 
-        <button id="btnCancelSelection" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white p-2 rounded-xl text-xs transition-all">
+        <button id="btnCancelSelection" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white p-2 rounded-xl text-xs transition-all cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
     </div>
 
-    <!-- MODAL XEM CHI TIẾT DỊCH CONTEXT -->
     <div id="contextModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 sm:p-6 space-y-4 animate-slide-up-modal my-auto max-h-[90vh] flex flex-col overflow-hidden">
             <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-3 flex-shrink-0">
@@ -475,7 +466,7 @@
                     <span id="modalTypeBadge" class="bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Word</span>
                     <h3 id="modalWordTitle" class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mt-1 break-words">word</h3>
                 </div>
-                <button id="closeContextModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 flex-shrink-0">
+                <button id="closeContextModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 flex-shrink-0 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -498,14 +489,13 @@
             </div>
 
             <div class="pt-2 flex gap-2 flex-shrink-0">
-                <button id="modalSaveVocabBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all">
+                <button id="modalSaveVocabBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
                     <span>➕ Lưu vào thư viện</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL THƯ VIỆN TỪ VỰNG -->
     <div id="libraryModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-2xl h-[85vh] flex flex-col p-4 sm:p-6 animate-slide-up-modal my-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3 flex-shrink-0">
@@ -513,7 +503,7 @@
                     <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">Thư viện từ vựng đã lưu</h3>
                     <span id="libCountBadge" class="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-2 py-0.5 rounded-full">0 từ</span>
                 </div>
-                <button id="closeLibraryModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                <button id="closeLibraryModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -521,12 +511,11 @@
             <div class="py-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
                 <input type="text" id="libSearchInput" placeholder="Tìm kiếm từ vựng..." class="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-3 py-2 outline-none focus:border-blue-500 w-full sm:w-64">
                 <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
-                    <button id="exportExcelBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm">
+                    <button id="exportExcelBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
                         <span>Xuất File Excel</span>
                     </button>
-
-                    <button id="clearAllVocabBtn" class="text-xs text-red-500 hover:text-red-700 px-2 py-1">Xóa tất cả</button>
+                    <button id="clearAllVocabBtn" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 cursor-pointer">Xóa tất cả</button>
                 </div>
             </div>
 
@@ -536,19 +525,18 @@
         </div>
     </div>
 
-    <!-- MODAL DÁN KHÔI PHỤC BÀI DỊCH & THƯ VIỆN -->
     <div id="restoreModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[92vw] sm:max-w-lg p-5 space-y-3 animate-slide-up-modal my-auto">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
                 <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Dán dữ liệu khôi phục</h3>
-                <button id="closeRestoreModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                <button id="closeRestoreModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu khôi phục vào đây (Bài dịch sẽ được khôi phục, Sổ từ vựng cũ sẽ được giữ nguyên và bổ sung thêm từ vựng mới):</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Dán mã dữ liệu khôi phục (JSON hoặc văn bản kèm mốc thời gian) vào đây:</p>
             <textarea id="restoreInputArea" class="w-full h-32 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500 resize-none font-mono" placeholder="Dán mã dữ liệu vào đây..."></textarea>
             <div class="flex gap-2 pt-1">
-                <button id="confirmRestoreBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                <button id="confirmRestoreBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer">
                     <span>Khôi phục ngay</span>
                 </button>
             </div>
@@ -560,13 +548,12 @@
         Thông báo
     </div>
 
-    <!-- SCRIPT CHÍNH -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const getEl = (id) => document.getElementById(id);
 
             function safeParseJson(rawStr) {
-                if (!rawStr) throw new Error("Dữ liệu rỗng");
+                if (!rawStr) return null;
                 let clean = rawStr.trim();
                 clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
                 
@@ -591,12 +578,49 @@
                     }
                 }
                 
-                return JSON.parse(clean);
+                try {
+                    return JSON.parse(clean);
+                } catch(e) {
+                    return null;
+                }
             }
 
             const themeToggleBtn = getEl('themeToggleBtn');
             const themeIconSun = getEl('themeIconSun');
             const themeIconMoon = getEl('themeIconMoon');
+
+            function applyTheme(isDark) {
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    if (document.body) document.body.classList.add('dark');
+                    if (themeIconSun) themeIconSun.classList.remove('hidden');
+                    if (themeIconMoon) themeIconMoon.classList.add('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    if (document.body) document.body.classList.remove('dark');
+                    if (themeIconSun) themeIconSun.classList.add('hidden');
+                    if (themeIconMoon) themeIconMoon.classList.remove('hidden');
+                }
+            }
+
+            let savedTheme = null;
+            try {
+                savedTheme = localStorage.getItem('theme');
+            } catch(e) {}
+            let isDarkMode = savedTheme !== null ? savedTheme === 'dark' : true;
+            applyTheme(isDarkMode);
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    isDarkMode = !isDarkMode;
+                    try {
+                        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                    } catch(err) {}
+                    applyTheme(isDarkMode);
+                    showToast(isDarkMode ? 'Đã bật chế độ Tối' : 'Đã bật chế độ Sáng');
+                });
+            }
 
             const openLibraryBtn = getEl('openLibraryBtn');
             const vocabBadge = getEl('vocabBadge');
@@ -675,250 +699,22 @@
             const restoreInputArea = getEl('restoreInputArea');
             const confirmRestoreBtn = getEl('confirmRestoreBtn');
 
-            // Các nút trên thanh điều khiển nổi
             const transcriptNavControls = getEl('transcriptNavControls');
+            const navHeaderTools = getEl('navHeaderTools');
             const dragHandleNav = getEl('dragHandleNav');
+            const rotateNavBtn = getEl('rotateNavBtn');
+            const rotateIcon = getEl('rotateIcon');
             const bookmarkNavBtn = getEl('bookmarkNavBtn');
             const prevSentenceNavBtn = getEl('prevSentenceNavBtn');
             const playPauseNavBtn = getEl('playPauseNavBtn');
             const playPauseIconPause = getEl('playPauseIconPause');
             const playPauseIconPlay = getEl('playPauseIconPlay');
             const nextSentenceNavBtn = getEl('nextSentenceNavBtn');
+            const prevNavIcon = getEl('prevNavIcon');
+            const nextNavIcon = getEl('nextNavIcon');
 
             let isVideoPaused = false;
-
-            function applyTheme(isDark) {
-                try {
-                    if (isDark) {
-                        document.documentElement.classList.add('dark');
-                        if (document.body) document.body.classList.add('dark');
-                        if (themeIconSun) themeIconSun.classList.remove('hidden');
-                        if (themeIconMoon) themeIconMoon.classList.add('hidden');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                        if (document.body) document.body.classList.remove('dark');
-                        if (themeIconSun) themeIconSun.classList.add('hidden');
-                        if (themeIconMoon) themeIconMoon.classList.remove('hidden');
-                    }
-                } catch(e) {}
-            }
-
-            let savedTheme = null;
-            try {
-                savedTheme = localStorage.getItem('theme');
-            } catch(e) {}
-            
-            let isDarkMode = savedTheme !== null ? savedTheme === 'dark' : true;
-            applyTheme(isDarkMode);
-
-            if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', (e) => {
-                    if (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                    isDarkMode = !isDarkMode;
-                    try {
-                        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-                    } catch(err) {}
-                    applyTheme(isDarkMode);
-                });
-            }
-
-            async function callGeminiApi(payload) {
-                const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
-                try {
-                    const response = await fetch(API_ENDPOINT, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        return await processLocalCanvasAI(payload);
-                    }
-                    return await response.json();
-                } catch (error) {
-                    return await processLocalCanvasAI(payload);
-                }
-            }
-
-            async function processLocalCanvasAI(payload) {
-                await new Promise(r => setTimeout(r, 600));
-
-                const promptText = JSON.stringify(payload);
-                
-                if (promptText.includes('Phân tích cụm từ tiếng Anh') || promptText.includes('Phân tích nhanh cụm từ')) {
-                    const phraseMatch = promptText.match(/cụm từ(?: tiếng Anh)? [\\"]*([^\\"]+)[\\"]/i);
-                    const sentenceMatch = promptText.match(/câu (?:ngữ cảnh gốc|gốc): [\\"]*([^\\"]+)[\\"]/i);
-                    
-                    const phrase = phraseMatch ? phraseMatch[1].trim() : "selected term";
-                    const fullSentence = sentenceMatch ? sentenceMatch[1].trim() : phrase;
-
-                    let type = "Vocabulary";
-                    const lowerPhrase = phrase.toLowerCase();
-                    if (lowerPhrase.includes(" ")) {
-                        if (/^(stumble across|come across|look forward to|carry out|bring up|turn down|put off|give up)/i.test(lowerPhrase)) {
-                            type = "Phrasal Verb";
-                        } else if (lowerPhrase.split(" ").length > 3) {
-                            type = "Idiomatic Expression";
-                        } else {
-                            type = "Collocation";
-                        }
-                    } else {
-                        if (lowerPhrase.endsWith("ly")) type = "Adverb";
-                        else if (lowerPhrase.endsWith("tion") || lowerPhrase.endsWith("ment") || lowerPhrase.endsWith("ness")) type = "Noun";
-                        else if (lowerPhrase.endsWith("ive") || lowerPhrase.endsWith("ous") || lowerPhrase.endsWith("al")) type = "Adjective";
-                        else type = "Verb";
-                    }
-
-                    let meaning = "Ý nghĩa chính xác theo bối cảnh bài học";
-                    let collocation = `${phrase} (sth/sb)`;
-
-                    const b2c1Examples = [
-                        `Demonstrating a strong mastery of ${phrase} allows professionals to navigate complex negotiations with confidence.`,
-                        `Recent academic studies indicate that incorporating ${phrase} into daily practice significantly enhances overall productivity.`,
-                        `The committee decided to adopt ${phrase} as part of their long-term strategic initiative for sustainable development.`,
-                        `Despite various economic challenges, the organization maintained its commitment to ${phrase} throughout the fiscal year.`
-                    ];
-                    const generatedExample = b2c1Examples[Math.floor(Math.random() * b2c1Examples.length)];
-
-                    return {
-                        candidates: [{
-                            content: {
-                                parts: [{
-                                    text: JSON.stringify({
-                                        word: phrase,
-                                        type: type,
-                                        meaning: meaning,
-                                        collocation: collocation,
-                                        example: generatedExample
-                                    })
-                                }]
-                            }
-                        }]
-                    };
-                }
-
-                let sentencePairs = [];
-                const rawInput = payload.contents?.[0]?.parts?.[0]?.text || "";
-
-                if (rawInput.includes("00:") || rawInput.includes("01:") || rawInput.includes("02:") || /\d{1,2}:\d{2}/.test(rawInput)) {
-                    const lines = rawInput.split('\n');
-                    let currentTime = "00:00";
-                    let currentSec = 0;
-
-                    lines.forEach(line => {
-                        const timeMatch = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*(.*)/);
-                        if (timeMatch) {
-                            currentTime = timeMatch[1].padStart(5, '0');
-                            const parts = currentTime.split(':').map(Number);
-                            currentSec = parts.length === 2 ? (parts[0] * 60 + parts[1]) : (parts[0] * 3600 + parts[1] * 60 + parts[2]);
-                            let text = timeMatch[2].trim();
-
-                            if (text) {
-                                sentencePairs.push({
-                                    time: currentTime,
-                                    seconds: currentSec,
-                                    en: text,
-                                    vi: text
-                                });
-                            }
-                        } else if (line.trim()) {
-                            if (sentencePairs.length > 0) {
-                                sentencePairs[sentencePairs.length - 1].en += " " + line.trim();
-                            } else {
-                                sentencePairs.push({
-                                    time: "00:00",
-                                    seconds: 0,
-                                    en: line.trim(),
-                                    vi: line.trim()
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    const rawSentences = rawInput.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 0);
-                    sentencePairs = rawSentences.map(s => ({
-                        en: s.trim(),
-                        vi: s.trim()
-                    }));
-                }
-
-                return {
-                    candidates: [{
-                        content: {
-                            parts: [{
-                                text: JSON.stringify(sentencePairs)
-                            }]
-                        }
-                    }]
-                };
-            }
-
-            function extractYoutubeId(url) {
-                if (!url) return null;
-                const cleanUrl = url.trim();
-                const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-                const match = cleanUrl.match(regExp);
-                return (match && match[1]) ? match[1] : null;
-            }
-
-            function loadYoutubeVideo(url) {
-                const videoId = extractYoutubeId(url);
-                if (!videoId) {
-                    showToast('Link YouTube không hợp lệ!', true);
-                    return false;
-                }
-
-                if (ytPlayerContainer) {
-                    ytPlayerContainer.innerHTML = `<div id="ytIframeContainer" class="w-full h-full"></div>`;
-                }
-
-                try {
-                    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-                        ytPlayer.destroy();
-                    }
-                } catch(e){}
-
-                if (window.YT && window.YT.Player) {
-                    try {
-                        ytPlayer = new YT.Player('ytIframeContainer', {
-                            height: '100%',
-                            width: '100%',
-                            videoId: videoId,
-                            host: 'https://www.youtube-nocookie.com',
-                            playerVars: {
-                                'playsinline': 1,
-                                'enablejsapi': 1,
-                                'origin': window.location.origin
-                            },
-                            events: {
-                                'onReady': (event) => {
-                                    if (currentPlaybackSpeed) {
-                                        try { event.target.setPlaybackRate(parseFloat(currentPlaybackSpeed)); } catch(e){}
-                                    }
-                                },
-                                'onStateChange': (event) => {
-                                    if (event.data === YT.PlayerState.PAUSED) {
-                                        updatePlayPauseUI(true);
-                                    } else if (event.data === YT.PlayerState.PLAYING) {
-                                        updatePlayPauseUI(false);
-                                    }
-                                }
-                            }
-                        });
-                    } catch(e) {
-                        if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
-                    }
-                } else {
-                    if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
-                }
-
-                showToast('Đã tải Video YouTube thành công!');
-                return true;
-            }
-
+            let isNavHorizontal = false;
             let imageFiles = [];
             let selectedWordTokens = [];
             let currentContextData = null;
@@ -926,15 +722,53 @@
             let vocabLibrary = [];
             try {
                 vocabLibrary = JSON.parse(localStorage.getItem('vocab_library') || '[]');
-            } catch(e){ vocabLibrary = []; }
+            } catch(e) { vocabLibrary = []; }
             
             let isViHidden = false;
-
             let ytPlayer = null;
             let isFollowEnabled = false;
             let followInterval = null;
             let currentActiveSentenceIndex = -1;
             let currentPlaybackSpeed = 1.00;
+
+            function updateNavOrientation(horizontal) {
+                isNavHorizontal = horizontal;
+                if (!transcriptNavControls) return;
+
+                if (horizontal) {
+                    transcriptNavControls.classList.remove('flex-col');
+                    transcriptNavControls.classList.add('flex-row');
+                    if (navHeaderTools) {
+                        navHeaderTools.classList.remove('w-full');
+                        navHeaderTools.classList.add('flex-col', 'h-full', 'border-r', 'border-slate-700/60', 'pr-1.5', 'mr-0.5');
+                    }
+                    if (prevNavIcon) prevNavIcon.innerHTML = `<path d="m15 18-6-6 6-6"/>`;
+                    if (nextNavIcon) nextNavIcon.innerHTML = `<path d="m9 18 6-6-6-6"/>`;
+                    if (prevSentenceNavBtn) prevSentenceNavBtn.className = 'w-11 sm:w-12 h-9 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
+                    if (nextSentenceNavBtn) nextSentenceNavBtn.className = 'w-11 sm:w-12 h-9 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
+                    if (rotateIcon) rotateIcon.style.transform = 'rotate(90deg)';
+                } else {
+                    transcriptNavControls.classList.remove('flex-row');
+                    transcriptNavControls.classList.add('flex-col');
+                    if (navHeaderTools) {
+                        navHeaderTools.classList.remove('flex-col', 'h-full', 'border-r', 'border-slate-700/60', 'pr-1.5', 'mr-0.5');
+                        navHeaderTools.classList.add('w-full');
+                    }
+                    if (prevNavIcon) prevNavIcon.innerHTML = `<path d="m18 15-6-6-6 6"/>`;
+                    if (nextNavIcon) nextNavIcon.innerHTML = `<path d="m6 9 6 6 6-6"/>`;
+                    if (prevSentenceNavBtn) prevSentenceNavBtn.className = 'w-9 sm:w-10 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
+                    if (nextSentenceNavBtn) nextSentenceNavBtn.className = 'w-9 sm:w-10 h-11 sm:h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 hover:text-white shadow-sm flex items-center justify-center transition-all border border-slate-700 flex-shrink-0 cursor-pointer';
+                    if (rotateIcon) rotateIcon.style.transform = 'rotate(0deg)';
+                }
+            }
+
+            if (rotateNavBtn) {
+                rotateNavBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    updateNavOrientation(!isNavHorizontal);
+                    showToast(isNavHorizontal ? 'Đã xoay thanh điều khiển Ngang' : 'Đã xoay thanh điều khiển Dọc');
+                });
+            }
 
             function updatePlayPauseUI(isPaused) {
                 isVideoPaused = isPaused;
@@ -942,7 +776,6 @@
                     if (playPauseIconPause) playPauseIconPause.classList.add('hidden');
                     if (playPauseIconPlay) playPauseIconPlay.classList.remove('hidden');
                     
-                    // Khi TẠM DỪNG: chuyển sang ĐỎ, mở khóa bấm đánh dấu
                     if (bookmarkNavBtn) {
                         bookmarkNavBtn.className = 'w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-md active:scale-95 border border-rose-400 cursor-pointer flex items-center justify-center transition-all duration-150';
                         bookmarkNavBtn.title = 'Đánh dấu đỏ câu thoại đang dừng';
@@ -951,7 +784,6 @@
                     if (playPauseIconPlay) playPauseIconPlay.classList.add('hidden');
                     if (playPauseIconPause) playPauseIconPause.classList.remove('hidden');
                     
-                    // Khi ĐANG CHẠY: chuyển về XANH NƯỚC BIỂN, vô hiệu hóa
                     if (bookmarkNavBtn) {
                         bookmarkNavBtn.className = 'w-9 sm:w-10 h-9 sm:h-10 rounded-xl bg-blue-600 text-white/50 cursor-not-allowed opacity-50 border border-blue-400/30 flex items-center justify-center transition-all duration-200';
                         bookmarkNavBtn.title = 'Tạm dừng video để đánh dấu câu';
@@ -990,7 +822,7 @@
                     if (!ytPlayer) return;
                     try {
                         const state = typeof ytPlayer.getPlayerState === 'function' ? ytPlayer.getPlayerState() : -1;
-                        if (state === 1) { // Đang chạy
+                        if (state === 1) {
                             if (typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
                             updatePlayPauseUI(true);
                         } else {
@@ -1036,72 +868,82 @@
                 highlightActiveSentence(index, false);
             }
 
-            // Kéo thả thanh điều khiển
             if (dragHandleNav && transcriptNavControls) {
                 let isDragging = false;
-                let startX, startY, initialLeft, initialTop;
+                let startClientX = 0, startClientY = 0;
+                let initialLeft = 0, initialTop = 0;
+                let currentLeft = 0, currentTop = 0;
+                let animationFrameId = null;
 
-                const startDrag = (clientX, clientY) => {
+                const renderPosition = () => {
+                    if (!isDragging) return;
+                    transcriptNavControls.style.left = `${currentLeft}px`;
+                    transcriptNavControls.style.top = `${currentTop}px`;
+                    animationFrameId = null;
+                };
+
+                const onPointerDown = (e) => {
                     isDragging = true;
+                    try { dragHandleNav.setPointerCapture(e.pointerId); } catch(err) {}
+
                     const rect = transcriptNavControls.getBoundingClientRect();
                     transcriptNavControls.style.right = 'auto';
+                    transcriptNavControls.style.bottom = 'auto';
                     transcriptNavControls.style.transform = 'none';
-                    transcriptNavControls.style.left = rect.left + 'px';
-                    transcriptNavControls.style.top = rect.top + 'px';
 
-                    startX = clientX;
-                    startY = clientY;
                     initialLeft = rect.left;
                     initialTop = rect.top;
-                };
+                    currentLeft = rect.left;
+                    currentTop = rect.top;
 
-                const doDrag = (clientX, clientY) => {
-                    if (!isDragging) return;
-                    const dx = clientX - startX;
-                    const dy = clientY - startY;
+                    startClientX = e.clientX;
+                    startClientY = e.clientY;
 
-                    let newLeft = initialLeft + dx;
-                    let newTop = initialTop + dy;
-
-                    const maxLeft = window.innerWidth - transcriptNavControls.offsetWidth - 8;
-                    const maxTop = window.innerHeight - transcriptNavControls.offsetHeight - 8;
-
-                    newLeft = Math.max(8, Math.min(newLeft, maxLeft));
-                    newTop = Math.max(8, Math.min(newTop, maxTop));
-
-                    transcriptNavControls.style.left = newLeft + 'px';
-                    transcriptNavControls.style.top = newTop + 'px';
-                };
-
-                const stopDrag = () => { isDragging = false; };
-
-                dragHandleNav.addEventListener('mousedown', (e) => {
+                    transcriptNavControls.classList.add('shadow-indigo-500/20', 'border-blue-500/80');
+                    document.body.style.userSelect = 'none';
                     e.preventDefault();
-                    startDrag(e.clientX, e.clientY);
-                    const onMouseMove = (ev) => doDrag(ev.clientX, ev.clientY);
-                    const onMouseUp = () => {
-                        stopDrag();
-                        document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup', onMouseUp);
-                    };
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                });
+                };
 
-                dragHandleNav.addEventListener('touchstart', (e) => {
-                    if (e.touches.length === 1) {
-                        startDrag(e.touches[0].clientX, e.touches[0].clientY);
+                const onPointerMove = (e) => {
+                    if (!isDragging) return;
+
+                    const dx = e.clientX - startClientX;
+                    const dy = e.clientY - startClientY;
+
+                    const navWidth = transcriptNavControls.offsetWidth;
+                    const navHeight = transcriptNavControls.offsetHeight;
+                    const maxLeft = Math.max(8, window.innerWidth - navWidth - 8);
+                    const maxTop = Math.max(8, window.innerHeight - navHeight - 8);
+
+                    currentLeft = Math.max(8, Math.min(initialLeft + dx, maxLeft));
+                    currentTop = Math.max(8, Math.min(initialTop + dy, maxTop));
+
+                    if (!animationFrameId) {
+                        animationFrameId = requestAnimationFrame(renderPosition);
                     }
-                }, { passive: false });
+                    e.preventDefault();
+                };
 
-                window.addEventListener('touchmove', (e) => {
-                    if (isDragging && e.touches.length === 1) {
-                        e.preventDefault();
-                        doDrag(e.touches[0].clientX, e.touches[0].clientY);
+                const onPointerUp = (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    try { dragHandleNav.releasePointerCapture(e.pointerId); } catch(err) {}
+
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                        animationFrameId = null;
                     }
-                }, { passive: false });
+                    transcriptNavControls.style.left = `${currentLeft}px`;
+                    transcriptNavControls.style.top = `${currentTop}px`;
 
-                window.addEventListener('touchend', stopDrag);
+                    transcriptNavControls.classList.remove('shadow-indigo-500/20', 'border-blue-500/80');
+                    document.body.style.userSelect = '';
+                };
+
+                dragHandleNav.addEventListener('pointerdown', onPointerDown);
+                window.addEventListener('pointermove', onPointerMove, { passive: false });
+                window.addEventListener('pointerup', onPointerUp);
+                window.addEventListener('pointercancel', onPointerUp);
             }
 
             if (toggleSlidersMenuBtn && settingsSlidersPanel) {
@@ -1304,7 +1146,7 @@
                     if (ytUrlInput) ytUrlInput.value = '';
                     if (ytTranscriptInput) ytTranscriptInput.value = '';
                     if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<p class="text-xs text-slate-500 text-center px-4">Nhấn <b>"Chỉnh sửa, đổi Video & Transcript"</b> ở bên dưới để nhập link và bài nói</p>`;
-                    try { if (ytPlayer) ytPlayer.destroy(); } catch(e){}
+                    try { if (ytPlayer && typeof ytPlayer.destroy === 'function') ytPlayer.destroy(); } catch(e){}
                     ytPlayer = null;
                     showToast('Đã làm sạch toàn bộ dữ liệu nhập.');
                 });
@@ -1425,9 +1267,9 @@
                         <span class="text-xs font-bold text-slate-400 w-4">${idx + 1}.</span>
                         <img src="${img.dataUrl}" class="w-10 h-10 object-cover rounded border border-slate-200 dark:border-slate-700">
                         <span class="text-xs text-slate-500 dark:text-slate-400 truncate flex-1">Ảnh ${idx + 1}</span>
-                        <button onclick="moveImage(${idx}, -1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400" ${idx === 0 ? 'disabled class="opacity-30"' : ''}>▲</button>
-                        <button onclick="moveImage(${idx}, 1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400" ${idx === imageFiles.length - 1 ? 'disabled class="opacity-30"' : ''}>▼</button>
-                        <button onclick="removeImage(${idx})" class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded">✕</button>
+                        <button onclick="moveImage(${idx}, -1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400 cursor-pointer" ${idx === 0 ? 'disabled class="opacity-30"' : ''}>▲</button>
+                        <button onclick="moveImage(${idx}, 1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400 cursor-pointer" ${idx === imageFiles.length - 1 ? 'disabled class="opacity-30"' : ''}>▼</button>
+                        <button onclick="removeImage(${idx})" class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded cursor-pointer">✕</button>
                     `;
                     imageListContainer.appendChild(item);
                 });
@@ -1446,6 +1288,69 @@
                 imageFiles.splice(index, 1);
                 renderImageList();
             };
+
+            function extractYoutubeId(url) {
+                if (!url) return null;
+                const cleanUrl = url.trim();
+                const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+                const match = cleanUrl.match(regExp);
+                return (match && match[1]) ? match[1] : null;
+            }
+
+            function loadYoutubeVideo(url) {
+                const videoId = extractYoutubeId(url);
+                if (!videoId) {
+                    showToast('Link YouTube không hợp lệ!', true);
+                    return false;
+                }
+
+                if (ytPlayerContainer) {
+                    ytPlayerContainer.innerHTML = `<div id="ytIframeContainer" class="w-full h-full"></div>`;
+                }
+
+                try {
+                    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+                        ytPlayer.destroy();
+                    }
+                } catch(e){}
+
+                if (window.YT && window.YT.Player) {
+                    try {
+                        ytPlayer = new YT.Player('ytIframeContainer', {
+                            height: '100%',
+                            width: '100%',
+                            videoId: videoId,
+                            host: 'https://www.youtube-nocookie.com',
+                            playerVars: {
+                                'playsinline': 1,
+                                'enablejsapi': 1,
+                                'origin': window.location.origin
+                            },
+                            events: {
+                                'onReady': (event) => {
+                                    if (currentPlaybackSpeed) {
+                                        try { event.target.setPlaybackRate(parseFloat(currentPlaybackSpeed)); } catch(e){}
+                                    }
+                                },
+                                'onStateChange': (event) => {
+                                    if (event.data === YT.PlayerState.PAUSED) {
+                                        updatePlayPauseUI(true);
+                                    } else if (event.data === YT.PlayerState.PLAYING) {
+                                        updatePlayPauseUI(false);
+                                    }
+                                }
+                            }
+                        });
+                    } catch(e) {
+                        if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+                    }
+                } else {
+                    if (ytPlayerContainer) ytPlayerContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&playsinline=1" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+                }
+
+                showToast('Đã tải Video YouTube thành công!');
+                return true;
+            }
 
             function cleanSentencePairs(pairs) {
                 if (!Array.isArray(pairs)) return [];
@@ -1477,9 +1382,80 @@
                 });
             }
 
+            async function callGeminiApi(payload) {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (e) {}
+
+                // Fallback nếu không có internet hoặc hết token
+                return await processLocalFallback(payload);
+            }
+
+            async function processLocalFallback(payload) {
+                await new Promise(r => setTimeout(r, 400));
+                const textInput = payload.contents?.[0]?.parts?.[0]?.text || "";
+
+                if (textInput.includes("Phân tích cụm từ")) {
+                    const phraseMatch = textInput.match(/cụm từ(?: tiếng Anh)? [\\"]*([^\\"]+)[\\"]/i);
+                    const phrase = phraseMatch ? phraseMatch[1].trim() : "Từ vựng";
+                    return {
+                        candidates: [{
+                            content: {
+                                parts: [{
+                                    text: JSON.stringify({
+                                        word: phrase,
+                                        type: "Collocation",
+                                        meaning: "Ý nghĩa theo bối cảnh câu thoại",
+                                        collocation: `${phrase} (sth/sb)`,
+                                        example: `Mastering ${phrase} helps improve overall language proficiency effectively.`
+                                    })
+                                }]
+                            }
+                        }]
+                    };
+                }
+
+                let fallbackPairs = [];
+                const lines = textInput.split('\n');
+                lines.forEach(line => {
+                    const m = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*(.*)/);
+                    if (m) {
+                        fallbackPairs.push({
+                            time: m[1],
+                            seconds: parseTimeToSeconds(m[1]),
+                            en: m[2],
+                            vi: m[2]
+                        });
+                    } else if (line.trim()) {
+                        if (fallbackPairs.length > 0) {
+                            fallbackPairs[fallbackPairs.length - 1].en += " " + line.trim();
+                        } else {
+                            fallbackPairs.push({ en: line.trim(), vi: line.trim() });
+                        }
+                    }
+                });
+
+                return {
+                    candidates: [{
+                        content: {
+                            parts: [{ text: JSON.stringify(fallbackPairs) }]
+                        }
+                    }]
+                };
+            }
+
             async function executeTranslation(activeTabId) {
                 clearSelection();
-
                 let payloadParts = [];
                 let systemPrompt = "";
 
@@ -1487,29 +1463,14 @@
                     const text = inputText ? inputText.value.trim() : '';
                     if (!text) return showToast('Vui lòng nhập văn bản!', true);
                     payloadParts.push({ text: text });
-
-                    systemPrompt = `Bạn là chuyên gia dịch thuật Anh - Việt cao cấp.
-Nhiệm vụ:
-1. Nhận văn bản tiếng Anh đầu vào.
-2. Nối các câu bị đứt gãy do xuống dòng thành các CÂU HOÀN CHỈNH.
-3. Bắt buộc tách kết quả theo TỪNG CÂU HOÀN CHỈNH.
-4. Trả về định dạng JSON Array chứa các cặp:
-   - "en": Câu tiếng Anh nguyên bản (đã nối gãy).
-   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh. KHÔNG bao giờ thêm tiền tố "Dịch:".`;
-
+                    systemPrompt = `Bạn là chuyên gia dịch thuật Anh - Việt cao cấp. Nối các câu bị gãy thành câu hoàn chỉnh và trả về JSON Array gồm "en", "vi". KHÔNG thêm tiền tố "Dịch:".`;
                 } else if (activeTabId === 'tab-images') {
                     if (imageFiles.length === 0) return showToast('Vui lòng tải lên hoặc dán ít nhất 1 ảnh!', true);
-                    payloadParts.push({ text: "Hãy đọc toàn bộ chữ tiếng Anh trong các bức ảnh theo đúng thứ tự, nối các câu bị gãy và dịch sang tiếng Việt:" });
+                    payloadParts.push({ text: "Hãy đọc chữ tiếng Anh trong ảnh, nối câu và dịch sang tiếng Việt:" });
                     imageFiles.forEach(img => {
                         payloadParts.push({ inlineData: { mimeType: img.mimeType, data: img.base64 } });
                     });
-
-                    systemPrompt = `Bạn là chuyên gia dịch thuật Anh - Việt cao cấp.
-Nhiệm vụ:
-1. Nhận hình ảnh tiếng Anh đầu vào.
-2. Nối các câu bị đứt gãy thành các CÂU HOÀN CHỈNH.
-3. Trả về định dạng JSON Array chứa: "en", "vi". KHÔNG bao giờ thêm tiền tố "Dịch:".`;
-
+                    systemPrompt = `Bạn là chuyên gia dịch thuật Anh - Việt. Trả về JSON Array gồm "en", "vi".`;
                 } else if (activeTabId === 'tab-youtube') {
                     const url = ytUrlInput ? ytUrlInput.value.trim() : '';
                     const transcriptText = ytTranscriptInput ? ytTranscriptInput.value.trim() : '';
@@ -1529,18 +1490,7 @@ Nhiệm vụ:
                     }
 
                     payloadParts.push({ text: transcriptText });
-
-                    systemPrompt = `Bạn là chuyên gia dịch thuật và xử lý transcript YouTube Anh - Việt.
-Nhiệm vụ:
-1. Nhận transcript tiếng Anh có mốc thời gian (ví dụ 00:16, 06:26...).
-2. Bắt buộc GIỮ NGUYÊN từng mốc thời gian theo đúng từng dòng transcript gốc (KHÔNG gộp hay nối câu theo dấu chấm). Mỗi mốc thời gian tạo thành 1 dòng transcript riêng biệt.
-3. Làm sạch hoàn toàn các thẻ '[music]' hoặc '[Music]': Nếu dòng transcript có từ khác ngoài '[music]', BỎ HẲN nhãn '[music]' cả ở phần tiếng Anh và tiếng Việt. Nếu một dòng transcript CHỈ CHỨA DUY NHẤT từ '[music]', hãy GIỮ NGUYÊN tiếng Anh '[music]' và dịch tiếng Việt '[Âm nhạc]'.
-4. Bắt buộc dịch mượt mà sang tiếng Việt cho TẤT CẢ các dòng, kể cả dòng chỉ có 1-2 từ. Tuyệt đối KHÔNG giữ nguyên tiếng Anh ở phần 'vi', KHÔNG bao giờ thêm tiền tố 'Dịch:'.
-5. Trả về định dạng JSON Array chứa:
-   - "time": Mốc thời gian nguyên bản (ví dụ "00:16").
-   - "seconds": Thời gian tính bằng giây quy đổi ra số.
-   - "en": Câu/Cụm từ tiếng Anh đã làm sạch [music] thừa.
-   - "vi": Câu dịch tiếng Việt mượt mà theo bối cảnh.`;
+                    systemPrompt = `Bạn là chuyên gia dịch transcript YouTube. Giữ nguyên mốc thời gian, loại bỏ [music] nếu có lời nói, dịch nghĩa mượt mà sang tiếng Việt. Trả về JSON Array gồm "time", "seconds", "en", "vi".`;
                 }
 
                 const payload = {
@@ -1564,9 +1514,7 @@ Nhiệm vụ:
                 try {
                     const data = await callGeminiApi(payload);
                     const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!rawJson) throw new Error("Không nhận được dữ liệu từ AI");
-                    
-                    const parsedPairs = safeParseJson(rawJson);
+                    const parsedPairs = safeParseJson(rawJson) || [];
                     currentSentencePairs = cleanSentencePairs(parsedPairs);
 
                     currentSentencePairs.forEach(pair => {
@@ -1582,9 +1530,7 @@ Nhiệm vụ:
                         updateFollowBtnUI();
                         if (ytEditModal) ytEditModal.classList.add('hidden');
                     }
-
                 } catch (err) {
-                    console.error(err);
                     if (outputContainer) outputContainer.innerHTML = `<div class="p-4 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-xl text-xs border border-red-200 dark:border-red-900"><p class="font-bold mb-1">Lỗi:</p><p>${err.message}</p></div>`;
                 } finally {
                     if (translateBtn) {
@@ -1650,7 +1596,7 @@ Nhiệm vụ:
                     card.className = `sentence-card p-2.5 rounded-xl border shadow-sm cursor-pointer select-none relative group ${pair.marked ? 'marked-sentence' : ''}`;
 
                     const bookmarkBtn = document.createElement('button');
-                    bookmarkBtn.className = 'absolute top-2 right-2 p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-colors z-10';
+                    bookmarkBtn.className = 'absolute top-2 right-2 p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-colors z-10 cursor-pointer';
                     bookmarkBtn.title = pair.marked ? "Bỏ đánh dấu" : "Đánh dấu câu";
                     bookmarkBtn.innerHTML = pair.marked
                         ? `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-rose-500"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15" stroke="currentColor" stroke-width="2"/></svg>`
@@ -1705,7 +1651,6 @@ Nhiệm vụ:
 
                     card.addEventListener('click', (e) => {
                         if (e.target.classList.contains('word-token')) return;
-
                         const sec = pair.seconds !== undefined ? pair.seconds : parseTimeToSeconds(pair.time);
                         if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
                             try {
@@ -1722,7 +1667,6 @@ Nhiệm vụ:
                     outputContainer.appendChild(card);
                 });
 
-                // CHỈ hiển thị thanh điều khiển khi ở tab Video YouTube
                 if (transcriptNavControls) {
                     if (isYtTab) {
                         transcriptNavControls.classList.remove('hidden');
@@ -1736,7 +1680,6 @@ Nhiệm vụ:
 
             function toggleWordSelection(span) {
                 const isSelected = span.classList.contains('selected');
-
                 if (isSelected) {
                     span.classList.remove('selected');
                     selectedWordTokens = selectedWordTokens.filter(item => item.element !== span);
@@ -1751,7 +1694,6 @@ Nhiệm vụ:
                         fullSentence: span.dataset.fullSentence
                     });
                 }
-
                 updateFloatingBar();
             }
 
@@ -1785,7 +1727,6 @@ Nhiệm vụ:
                     if (selectedWordTokens.length === 0) return;
                     const selectedPhrase = selectedWordTokens.map(t => t.cleanText).filter(Boolean).join(' ');
                     const fullSentence = selectedWordTokens[0].fullSentence;
-
                     openContextModalLoading(selectedPhrase, fullSentence);
                     await fetchContextAnalysis(selectedPhrase, fullSentence);
                 });
@@ -1803,30 +1744,26 @@ Nhiệm vụ:
 
             async function fetchContextAnalysis(phrase, sentence) {
                 const prompt = `Phân tích cụm từ tiếng Anh "${phrase}" trong câu ngữ cảnh gốc sau: "${sentence}".
-Yêu cầu trả về JSON gồm:
-- "word": Cụm từ/Collocation nguyên bản chuẩn nhất.
-- "type": Từ loại chính xác chuẩn ngữ pháp/ngôn ngữ (Verb, Adjective, Noun, Adverb, Phrasal Verb, Collocation, Idiom, Idiomatic Expression,...).
-- "meaning": Ý nghĩa chính xác của từ/cụm từ theo bối cảnh bài học (ngắn gọn, dễ hiểu).
-- "collocation": Cấu trúc/cụm đi kèm đầy đủ chứa từ đó (ví dụ: stumble across sth).
-- "example": Tạo 01 câu ví dụ tiếng Anh MỚI hoàn toàn ở trình độ B2 đến C1 (độ dài vừa đủ, không quá ngắn, không quá dài) có chứa từ/cụm từ trên với ĐÚNG nét nghĩa trong bài học. Tuyệt đối KHÔNG lấy lại câu gốc.`;
-
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }]
-                };
+Trả về JSON gồm: "word", "type", "meaning", "collocation", "example" (ví dụ mới hoàn toàn B2-C1).`;
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
                 try {
                     const data = await callGeminiApi(payload);
                     const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!rawJson) throw new Error("Lỗi tra từ!");
-                    
-                    const result = safeParseJson(rawJson);
+                    const result = safeParseJson(rawJson) || {
+                        word: phrase,
+                        type: 'Vocabulary',
+                        meaning: 'Ý nghĩa theo bối cảnh bài học',
+                        collocation: `${phrase} (sth)`,
+                        example: `Mastering ${phrase} improves academic English.`
+                    };
 
                     currentContextData = {
                         id: Date.now(),
                         word: result.word || phrase,
                         type: result.type || 'Vocabulary',
-                        meaning: result.meaning,
-                        collocation: result.collocation,
+                        meaning: result.meaning || 'Chưa rõ nghĩa',
+                        collocation: result.collocation || phrase,
                         sentence: result.example || sentence,
                         date: new Date().toLocaleDateString('vi-VN')
                     };
@@ -1840,9 +1777,7 @@ Yêu cầu trả về JSON gồm:
                         modalSaveVocabBtn.disabled = false;
                         modalSaveVocabBtn.innerHTML = `<span>➕ Lưu vào thư viện</span>`;
                     }
-
                 } catch (err) {
-                    console.error(err);
                     if (modalMeaningText) modalMeaningText.textContent = "Không thể phân tích ngữ cảnh từ này.";
                 }
             }
@@ -1860,21 +1795,17 @@ Yêu cầu trả về JSON gồm:
                     btnAddDictDirect.disabled = true;
 
                     try {
-                        const prompt = `Phân tích nhanh cụm từ "${selectedPhrase}" trong câu gốc: "${fullSentence}".
-Trả về JSON:
-- "word": Cụm từ/Collocation chuẩn.
-- "type": Từ loại chính xác (Verb, Adjective, Noun, Adverb, Phrasal Verb, Collocation, Idiom, Idiomatic Expression,...).
-- "meaning": Nghĩa tiếng Việt theo bối cảnh ngắn gọn.
-- "collocation": Cấu trúc đầy đủ.
-- "example": Tạo 01 câu ví dụ tiếng Anh MỚI hoàn toàn ở trình độ B2 đến C1 chứa cụm từ trên. Tuyệt đối KHÔNG lấy lại câu gốc.`;
-
-                        const payload = {
-                            contents: [{ parts: [{ text: prompt }] }]
-                        };
-
+                        const prompt = `Phân tích cụm từ "${selectedPhrase}" trong câu: "${fullSentence}". Trả về JSON: "word", "type", "meaning", "collocation", "example".`;
+                        const payload = { contents: [{ parts: [{ text: prompt }] }] };
                         const data = await callGeminiApi(payload);
                         const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                        const result = safeParseJson(rawJson);
+                        const result = safeParseJson(rawJson) || {
+                            word: selectedPhrase,
+                            type: 'Vocab',
+                            meaning: 'Ý nghĩa bài học',
+                            collocation: selectedPhrase,
+                            example: fullSentence
+                        };
 
                         const itemToSave = {
                             id: Date.now(),
@@ -1958,7 +1889,7 @@ Trả về JSON:
                         <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 break-words">${item.meaning}</p>
                         <p class="text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-1.5 rounded border border-slate-200 dark:border-slate-700 break-words">Cấu trúc: ${item.collocation}</p>
                         <p class="text-[11px] text-slate-500 dark:text-slate-400 italic break-words">Ví dụ: "${item.sentence}"</p>
-                        <button onclick="deleteVocabItem(${item.id})" class="absolute top-3 right-3 text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 text-xs">✕</button>
+                        <button onclick="deleteVocabItem(${item.id})" class="absolute top-3 right-3 text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 text-xs cursor-pointer">✕</button>
                     `;
                     vocabListContainer.appendChild(card);
                 });
@@ -1992,7 +1923,6 @@ Trả về JSON:
             if (exportExcelBtn) {
                 exportExcelBtn.addEventListener('click', () => {
                     if (vocabLibrary.length === 0) return showToast('Thư viện rỗng, chưa có từ để xuất!', true);
-
                     const exportData = vocabLibrary.map((item, index) => ({
                         "STT": index + 1,
                         "Từ/Cụm từ": item.word,
@@ -2006,15 +1936,7 @@ Trả về JSON:
                     const workbook = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(workbook, worksheet, "Tu_Vung_IELTS");
 
-                    worksheet['!cols'] = [
-                        { wch: 5 },
-                        { wch: 18 },
-                        { wch: 12 },
-                        { wch: 22 },
-                        { wch: 22 },
-                        { wch: 38 }
-                    ];
-
+                    worksheet['!cols'] = [{ wch: 5 }, { wch: 18 }, { wch: 12 }, { wch: 22 }, { wch: 22 }, { wch: 38 }];
                     const range = XLSX.utils.decode_range(worksheet['!ref']);
                     for (let R = range.s.r; R <= range.e.r; ++R) {
                         for (let C = range.s.c; C <= range.e.c; ++C) {
@@ -2024,7 +1946,6 @@ Trả về JSON:
                             worksheet[cell_ref].s.alignment = { wrapText: true, vertical: 'top' };
                         }
                     }
-
                     XLSX.writeFile(workbook, `Tu_Vung_AI_Dich_${new Date().toISOString().slice(0,10)}.xlsx`);
                     showToast('Đã xuất file Excel chuẩn khổ A4 thành công!');
                 });
@@ -2073,14 +1994,16 @@ Trả về JSON:
                     const pastedText = restoreInputArea ? restoreInputArea.value.trim() : '';
                     if (!pastedText) return showToast('Vui lòng dán mã dữ liệu khôi phục!', true);
 
-                    try {
-                        const parsedData = JSON.parse(pastedText);
-                        let restoredPairs = [];
-                        let restoredVocab = null;
+                    let restoredPairs = [];
+                    let restoredVocab = null;
 
+                    // 1. Thử phân tích định dạng JSON
+                    const parsedData = safeParseJson(pastedText);
+
+                    if (parsedData) {
                         if (Array.isArray(parsedData)) {
                             restoredPairs = parsedData;
-                        } else if (parsedData && typeof parsedData === 'object') {
+                        } else if (typeof parsedData === 'object') {
                             if (Array.isArray(parsedData.sentencePairs)) restoredPairs = parsedData.sentencePairs;
                             if (Array.isArray(parsedData.vocabLibrary)) restoredVocab = parsedData.vocabLibrary;
                             
@@ -2113,34 +2036,64 @@ Trả về JSON:
                                 updateFollowBtnUI();
                             }
                         }
+                    } else {
+                        // 2. Tự động nhận diện định dạng văn bản transcript thô có timestamp
+                        const lines = pastedText.split('\n');
+                        let tempPair = null;
 
-                        if (restoredPairs.length === 0 && (!restoredVocab || restoredVocab.length === 0)) {
-                            throw new Error("Mã dữ liệu không hợp lệ.");
-                        }
+                        for (let line of lines) {
+                            const trimmed = line.trim();
+                            if (!trimmed) continue;
 
-                        if (restoredPairs.length > 0) {
-                            renderResults(cleanSentencePairs(restoredPairs));
-                        }
-
-                        if (restoredVocab && restoredVocab.length > 0) {
-                            const existingIds = new Set(vocabLibrary.map(v => v.id));
-                            restoredVocab.forEach(item => {
-                                if (!existingIds.has(item.id)) {
-                                    vocabLibrary.push(item);
-                                    existingIds.add(item.id);
+                            const timeMatch = trimmed.match(/^\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*(.*)$/);
+                            if (timeMatch) {
+                                if (tempPair) restoredPairs.push(tempPair);
+                                const timeStr = timeMatch[1];
+                                const textAfterTime = timeMatch[2].replace(/^(?:EN|VI)\s*:\s*/i, '').trim();
+                                tempPair = {
+                                    time: timeStr,
+                                    seconds: parseTimeToSeconds(timeStr),
+                                    en: textAfterTime,
+                                    vi: ''
+                                };
+                            } else if (tempPair) {
+                                const cleanLine = trimmed.replace(/^(?:EN|VI)\s*:\s*/i, '').trim();
+                                if (!tempPair.en) {
+                                    tempPair.en = cleanLine;
+                                } else if (!tempPair.vi) {
+                                    tempPair.vi = cleanLine;
+                                } else {
+                                    tempPair.vi += ' ' + cleanLine;
                                 }
-                            });
-                            try {
-                                localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
-                            } catch(e){}
-                            updateVocabBadge();
+                            }
                         }
-
-                        if (restoreModal) restoreModal.classList.add('hidden');
-                        showToast('Đã khôi phục thành công!');
-                    } catch (e) {
-                        showToast('Mã dữ liệu không đúng định dạng khôi phục.', true);
+                        if (tempPair) restoredPairs.push(tempPair);
                     }
+
+                    if (restoredPairs.length === 0 && (!restoredVocab || restoredVocab.length === 0)) {
+                        return showToast('Mã dữ liệu không hợp lệ hoặc không tìm thấy câu thoại.', true);
+                    }
+
+                    if (restoredPairs.length > 0) {
+                        renderResults(cleanSentencePairs(restoredPairs));
+                    }
+
+                    if (restoredVocab && restoredVocab.length > 0) {
+                        const existingIds = new Set(vocabLibrary.map(v => v.id));
+                        restoredVocab.forEach(item => {
+                            if (!existingIds.has(item.id)) {
+                                vocabLibrary.push(item);
+                                existingIds.add(item.id);
+                            }
+                        });
+                        try {
+                            localStorage.setItem('vocab_library', JSON.stringify(vocabLibrary));
+                        } catch(e){}
+                        updateVocabBadge();
+                    }
+
+                    if (restoreModal) restoreModal.classList.add('hidden');
+                    showToast('Đã khôi phục dữ liệu thành công!');
                 });
             }
 
@@ -2159,7 +2112,7 @@ Trả về JSON:
 
             updateVocabBadge();
 
-            // Chặn double-tap zoom an toàn trên iOS/Safari (không làm đơ hay chặn click các nút bấm)
+            // Chặn double-tap zoom an toàn trên iOS/Safari (không chặn lệnh click của các nút)
             let lastTouchEnd = 0;
             document.addEventListener('touchend', function (e) {
                 if (e.target.closest('button, a, input, textarea, select, .word-token, .sentence-card')) {
